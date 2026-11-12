@@ -22,6 +22,8 @@ class AgentHierarchyTests(unittest.TestCase):
             "Build an Android app in Kotlin": "lucas",
             "Create a PHP Laravel API": "lucas",
             "Optimize a MongoDB database": "lucas",
+            "Write Playwright end-to-end tests": "lucas",
+            "Build a C++ service": "lucas",
             "Hello Eleven": "eleven",
         }
         for message, expected in cases.items():
