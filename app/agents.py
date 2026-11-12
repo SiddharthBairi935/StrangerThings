@@ -9,55 +9,19 @@ class AgentInfo:
     capabilities: tuple[str, ...]
 
 
+# "active" means the specialist prompt and routing are available inside Eleven.
+# It does not imply that an external service or API is connected.
 AGENTS: tuple[AgentInfo, ...] = (
-    AgentInfo(
-        name="general",
-        description="Conversation, explanation, planning, and everyday assistance.",
-        status="active",
-        capabilities=("chat", "explain", "plan"),
-    ),
-    AgentInfo(
-        name="coding",
-        description="Code reasoning, debugging guidance, and software design through the configured model.",
-        status="active",
-        capabilities=("code", "debug", "architecture"),
-    ),
-    AgentInfo(
-        name="research",
-        description="Structured research and synthesis; live web access is not connected yet.",
-        status="active",
-        capabilities=("research", "summarize", "compare"),
-    ),
-    AgentInfo(
-        name="github",
-        description="Repository operations; GitHub API tools and scoped permissions are not connected to Eleven yet.",
-        status="planned",
-        capabilities=("repository", "issues", "pull_requests"),
-    ),
-    AgentInfo(
-        name="drive",
-        description="Google Drive search and file operations; connector is not configured yet.",
-        status="planned",
-        capabilities=("files", "documents"),
-    ),
-    AgentInfo(
-        name="voice",
-        description="Speech input and speech output pipeline.",
-        status="planned",
-        capabilities=("speech_to_text", "text_to_speech"),
-    ),
-    AgentInfo(
-        name="vision",
-        description="Image understanding and optional face recognition.",
-        status="planned",
-        capabilities=("image_understanding", "face_recognition"),
-    ),
-    AgentInfo(
-        name="tasks",
-        description="Scheduled and background task execution.",
-        status="planned",
-        capabilities=("automation", "scheduling"),
-    ),
+    AgentInfo("general", "Eleven's main assistant for conversation, planning, and coordination.", "active", ("chat", "plan", "coordinate")),
+    AgentInfo("coding", "Software engineering, code review, debugging, and architecture.", "active", ("code", "debug", "architecture")),
+    AgentInfo("research", "Research planning, source evaluation, comparison, and synthesis.", "active", ("research", "summarize", "compare")),
+    AgentInfo("workspace", "Documents, spreadsheets, reports, and workspace workflows; Drive connector is not connected.", "planned", ("documents", "spreadsheets", "reports")),
+    AgentInfo("linkedin", "Professional profile research, job and freelance opportunity workflows; LinkedIn actions are not connected.", "planned", ("profile_review", "jobs", "freelance")),
+    AgentInfo("github", "Repository operations; a runtime GitHub integration for Eleven is not connected.", "planned", ("repository", "issues", "pull_requests")),
+    AgentInfo("drive", "Google Drive search and file operations; connector is not configured.", "planned", ("files", "documents")),
+    AgentInfo("voice", "Speech input and speech output pipeline.", "planned", ("speech_to_text", "text_to_speech")),
+    AgentInfo("vision", "Image understanding and visual analysis.", "planned", ("image_understanding",)),
+    AgentInfo("tasks", "Scheduled and background task execution.", "planned", ("automation", "scheduling")),
 )
 
 
@@ -74,16 +38,48 @@ def list_agents() -> list[dict[str, object]]:
 
 
 def route_agent(message: str) -> str:
-    text = message.lower()
-    if any(word in text for word in ("python", "dart", "flutter", "javascript", "code", "bug", "debug", "api", "function", "program")):
-        return "coding"
-    if any(word in text for word in ("research", "compare", "investigate", "sources", "अध्ययन", "तुलना")):
-        return "research"
+    """Route an incoming request to the best available specialist prompt."""
+    text = " ".join(message.lower().split())
+
+    # Strong domain-specific phrases are checked before broad keywords.
+    routes = (
+        ("coding", ("debug", "bug", "stack trace", "exception", "python", "javascript",
+                    "typescript", "flutter", "dart", "react", "next.js", "nextjs",
+                    "sql", "database", "api", "code", "program", "function", "github repo")),
+        ("workspace", ("spreadsheet", "excel", "google sheets", "google drive", "document",
+                       "word file", "powerpoint", "presentation", "report", "pdf")),
+        ("linkedin", ("linkedin", "job opening", "job openings", "job search", "job",
+                      "freelance", "freelancing", "resume", "cv", "career opportunity")),
+        ("research", ("research", "investigate", "compare", "comparison", "sources",
+                      "latest information", "market analysis", "competitor", "अध्ययन", "तुलना")),
+    )
+    for agent_name, phrases in routes:
+        if any(phrase in text for phrase in phrases):
+            return agent_name
     return "general"
 
 
 AGENT_INSTRUCTIONS = {
-    "general": "Be a thoughtful personal assistant. Answer clearly and ask only necessary questions.",
-    "coding": "Act as a senior software engineer. Explain assumptions, provide correct code, and never claim code was executed unless it was.",
-    "research": "Act as a careful research analyst. Separate known facts from uncertainty. Do not claim live browsing or citations unless available.",
+    "general": (
+        "You are Eleven's main brain. Understand the user's goal, break complex work into "
+        "clear steps, and identify which specialist or external integration would be needed. "
+        "Do not pretend planned specialists or disconnected services have performed work."
+    ),
+    "coding": (
+        "Act as a senior software engineer. Inspect requirements carefully, explain assumptions, "
+        "provide maintainable code, and never claim code was executed unless it was."
+    ),
+    "research": (
+        "Act as a careful research analyst. Separate verified facts from inference, identify "
+        "when current sources are required, and never invent browsing or citations."
+    ),
+    "workspace": (
+        "Act as a document and data specialist. Help structure documents, spreadsheets, and "
+        "reports. State clearly that Drive or office-file actions require a connected tool."
+    ),
+    "linkedin": (
+        "Act as a career and professional-network specialist. Help with profile strategy, "
+        "job and freelance research, and tailored applications. Never claim to access LinkedIn, "
+        "send messages, or apply unless a connected tool confirms it."
+    ),
 }
