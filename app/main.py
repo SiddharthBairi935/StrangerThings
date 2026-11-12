@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
-from app.database import init_db, save_message, get_history
+from app.database import get_history, init_db, save_message
 
 settings = get_settings()
 
@@ -47,7 +47,9 @@ class ChatResponse(BaseModel):
     agent: str = "orchestrator"
 
 
-async def generate_reply(conversation_id: str, message: str) -> tuple[str, str]:
+async def generate_reply(conversation_id: str) -> tuple[str, str]:
+    history = get_history(settings.database_path, conversation_id, limit=20)
+
     if not settings.llm_api_key or not settings.llm_model:
         return (
             "Eleven का backend चालू है और आपकी बातचीत सुरक्षित रूप से सेव हो गई है। "
@@ -55,7 +57,6 @@ async def generate_reply(conversation_id: str, message: str) -> tuple[str, str]:
             "model_not_configured",
         )
 
-    history = get_history(settings.database_path, conversation_id, limit=20)
     messages = [
         {
             "role": "system",
@@ -71,7 +72,6 @@ async def generate_reply(conversation_id: str, message: str) -> tuple[str, str]:
         for item in history
         if item["role"] in {"user", "assistant"}
     )
-    messages.append({"role": "user", "content": message})
 
     url = settings.llm_base_url.rstrip("/") + "/v1/chat/completions"
     try:
@@ -88,7 +88,6 @@ async def generate_reply(conversation_id: str, message: str) -> tuple[str, str]:
                 raise ValueError("Provider returned an empty assistant message.")
             return answer.strip(), "ok"
     except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
-        # Do not leak provider credentials or raw upstream responses to clients.
         raise HTTPException(
             status_code=502,
             detail="The configured AI provider could not complete the request.",
@@ -112,7 +111,7 @@ async def health() -> dict[str, str]:
 async def chat(payload: ChatRequest) -> ChatResponse:
     conversation_id = payload.conversation_id or str(uuid4())
     save_message(settings.database_path, conversation_id, "user", payload.message)
-    answer, status = await generate_reply(conversation_id, payload.message)
+    answer, status = await generate_reply(conversation_id)
     save_message(settings.database_path, conversation_id, "assistant", answer)
     return ChatResponse(
         conversation_id=conversation_id,
