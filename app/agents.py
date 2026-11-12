@@ -20,32 +20,82 @@ AGENTS: tuple[AgentInfo, ...] = (
     AgentInfo("mike", "Mike", "Google Drive: find, organize, read, summarize, and manage files with connected and approved Drive access.", "planned", "eleven", ("drive", "files", "documents")),
     AgentInfo("dustin", "Dustin", "General day-to-day research, comparisons, fact-checking, learning, and evidence-based recommendations.", "active", "eleven", ("research", "compare", "fact_check")),
     AgentInfo("lucas", "Lucas", "Head of the Coding Department. Delegates engineering work to five equal-level coding specialists and coordinates their results.", "active", "eleven", ("software_development", "code_review", "coordination")),
-    AgentInfo(
-        "frontend",
-        "Frontend Agent",
-        "Full-spectrum frontend engineering: semantic HTML, CSS, JavaScript, TypeScript, UI frameworks, component libraries, responsive UX, accessibility, API integration, frontend tooling, performance, and testing.",
-        "active",
-        "lucas",
-        (
-            "html", "html5", "css", "css3", "javascript", "es6_plus", "typescript",
-            "bootstrap", "tailwind_css", "sass", "scss", "less",
-            "react", "react_js", "nextjs", "angular", "vue", "nuxt",
-            "svelte", "sveltekit", "astro", "jquery",
-            "redux", "redux_toolkit", "zustand", "context_api", "tanstack_query",
-            "material_ui", "mui", "ant_design", "chakra_ui", "shadcn_ui",
-            "responsive_design", "mobile_first", "ui_ux", "figma_to_code",
-            "accessibility", "wcag", "cross_browser", "animations",
-            "rest_api", "graphql", "websocket", "authentication_integration",
-            "vite", "webpack", "npm", "yarn", "pnpm", "git", "github",
-            "eslint", "prettier", "jest", "vitest", "react_testing_library",
-            "cypress", "playwright", "seo", "core_web_vitals",
-            "performance_optimization", "lazy_loading", "code_splitting",
-        ),
-    ),
-    AgentInfo("mobile", "Mobile Agent", "Mobile applications: Flutter, Dart, Android, iOS, responsive mobile UX, and app integration.", "active", "lucas", ("flutter", "dart", "android", "ios")),
-    AgentInfo("backend", "Backend Agent", "Server-side engineering: APIs, Python, Java, authentication, business logic, and integrations.", "active", "lucas", ("apis", "python", "java", "authentication")),
-    AgentInfo("database", "Database Agent", "Database engineering: SQL, PostgreSQL, schema design, query optimization, migrations, and data security.", "active", "lucas", ("sql", "postgresql", "schema", "optimization")),
-    AgentInfo("testing", "Testing Agent", "Quality assurance: unit and integration tests, regression checks, debugging, and test reports.", "active", "lucas", ("unit_testing", "integration_testing", "qa", "debugging")),
+    AgentInfo("frontend", "Frontend Agent", "Full-spectrum frontend engineering: HTML, CSS, JavaScript, TypeScript, web frameworks, UI systems, responsive UX, accessibility, APIs, tooling, performance, and frontend testing.", "active", "lucas", (
+        "html", "html5", "css", "css3", "javascript", "es6_plus", "typescript",
+        "bootstrap", "tailwind_css", "sass", "scss", "less",
+        "react", "react_js", "nextjs", "angular", "vue", "nuxt", "svelte", "sveltekit", "astro", "jquery",
+        "redux", "redux_toolkit", "zustand", "context_api", "tanstack_query",
+        "material_ui", "mui", "ant_design", "chakra_ui", "shadcn_ui",
+        "responsive_design", "mobile_first", "ui_ux", "figma_to_code",
+        "accessibility", "wcag", "cross_browser", "animations",
+        "rest_api", "graphql", "websocket", "authentication_integration",
+        "vite", "webpack", "npm", "yarn", "pnpm", "git", "github",
+        "eslint", "prettier", "jest", "vitest", "react_testing_library",
+        "cypress", "playwright", "seo", "core_web_vitals",
+        "performance_optimization", "lazy_loading", "code_splitting",
+    )),
+    AgentInfo("mobile", "Mobile Agent", "Full-spectrum mobile engineering across native, cross-platform, hybrid, device APIs, app architecture, UX, security, testing, and store delivery.", "active", "lucas", (
+        "flutter", "dart", "react_native", "javascript_mobile", "typescript_mobile", "expo",
+        "android", "kotlin", "java_android", "jetpack_compose",
+        "ios", "swift", "swiftui", "uikit",
+        "dotnet_maui", "xamarin", "ionic", "capacitor", "cordova",
+        "kotlin_multiplatform", "native_script", "pwa",
+        "mobile_ui_ux", "responsive_mobile_design", "navigation", "state_management",
+        "rest_api", "graphql", "websocket", "authentication", "push_notifications",
+        "camera", "gps", "maps", "bluetooth", "biometrics", "deep_links",
+        "local_storage", "sqlite_mobile", "realm", "firebase", "offline_first",
+        "mobile_security", "app_performance", "accessibility",
+        "unit_testing", "widget_testing", "integration_testing", "appium", "detox",
+        "fastlane", "play_store_release", "app_store_release", "ci_cd_mobile",
+    )),
+    AgentInfo("backend", "Backend Agent", "Full-spectrum server-side engineering across languages, frameworks, APIs, distributed systems, security, integrations, deployment, and operations.", "active", "lucas", (
+        "java", "spring", "spring_boot", "jakarta_ee", "quarkus", "micronaut",
+        "python", "django", "flask", "fastapi",
+        "php", "laravel", "symfony", "composer",
+        "csharp", "dotnet", "aspnet", "aspnet_core", "entity_framework",
+        "nodejs", "express", "nestjs", "fastify",
+        "go", "golang", "ruby", "rails", "rust", "c", "cpp", "c_plus_plus",
+        "rest_api", "graphql", "grpc", "websocket", "webhooks",
+        "authentication", "authorization", "oauth2", "openid_connect", "jwt",
+        "api_security", "input_validation", "rate_limiting", "encryption",
+        "microservices", "monoliths", "event_driven", "message_queues",
+        "kafka", "rabbitmq", "redis", "caching",
+        "docker", "kubernetes", "serverless", "cloud_deployment",
+        "linux", "nginx", "apache", "ci_cd", "observability", "logging", "monitoring",
+        "unit_testing", "integration_testing", "api_testing", "performance",
+    )),
+    AgentInfo("database", "Database Agent", "Full-spectrum data engineering across relational, document, key-value, wide-column, graph, and cloud databases, including architecture, reliability, security, and optimization.", "active", "lucas", (
+        "sql", "postgresql", "postgres", "mysql", "mariadb", "sql_server",
+        "oracle_database", "sqlite", "db2",
+        "mongodb", "redis", "cassandra", "dynamodb", "firebase", "firestore",
+        "cosmos_db", "couchbase", "couchdb", "elasticsearch", "opensearch",
+        "neo4j", "influxdb", "clickhouse", "snowflake", "bigquery", "redshift",
+        "relational_modeling", "document_modeling", "graph_modeling",
+        "schema_design", "normalization", "denormalization", "indexing",
+        "query_optimization", "execution_plans", "stored_procedures", "triggers",
+        "transactions", "acid", "isolation_levels", "locking", "concurrency",
+        "migrations", "orm", "hibernate", "sqlalchemy", "entity_framework",
+        "backup", "restore", "replication", "sharding", "partitioning",
+        "high_availability", "disaster_recovery", "data_integrity",
+        "database_security", "encryption_at_rest", "access_control", "auditing",
+        "etl", "elt", "data_warehousing", "data_modeling", "performance_monitoring",
+    )),
+    AgentInfo("testing", "Testing Agent", "Full-spectrum quality engineering across manual and automated testing, all application layers, reliability, security, performance, accessibility, and release quality.", "active", "lucas", (
+        "manual_testing", "exploratory_testing", "test_planning", "test_cases",
+        "unit_testing", "integration_testing", "system_testing", "end_to_end_testing",
+        "regression_testing", "smoke_testing", "sanity_testing", "acceptance_testing",
+        "api_testing", "ui_testing", "mobile_testing", "cross_browser_testing",
+        "performance_testing", "load_testing", "stress_testing", "soak_testing",
+        "security_testing", "accessibility_testing", "compatibility_testing",
+        "selenium", "playwright", "cypress", "appium", "detox",
+        "jest", "vitest", "pytest", "unittest", "junit", "testng",
+        "postman", "newman", "rest_assured", "karate",
+        "jmeter", "k6", "gatling", "locust", "owasp_zap", "burp_suite",
+        "mocking", "contract_testing", "snapshot_testing", "visual_regression",
+        "test_automation", "test_data_management", "defect_tracking",
+        "root_cause_analysis", "coverage_analysis", "ci_cd_testing",
+        "release_validation", "quality_reporting",
+    )),
 )
 
 
@@ -77,8 +127,10 @@ def route_agent(message: str) -> str:
         ("lucas", ("debug", "bug", "stack trace", "exception", "python", "javascript",
                    "typescript", "flutter", "dart", "react", "next.js", "nextjs", "angular",
                    "vue.js", "vue", "svelte", "html", "css", "bootstrap", "tailwind",
-                   "sql", "database", "api", "code", "coding", "program", "function", "github repo",
-                   "ऐप बनाओ", "कोड")),
+                   "kotlin", "swift", "react native", "php", "laravel", "asp.net", ".net",
+                   "spring boot", "django", "fastapi", "node.js", "nestjs", "golang",
+                   "sql", "database", "mongodb", "postgres", "api", "code", "coding",
+                   "program", "function", "github repo", "ऐप बनाओ", "कोड")),
         ("dustin", ("research", "investigate", "compare", "comparison", "sources",
                     "latest information", "market analysis", "competitor", "fact check",
                     "अध्ययन", "तुलना", "रिसर्च")),
@@ -117,11 +169,14 @@ AGENT_INSTRUCTIONS = {
         "facts from inference, and state uncertainty."
     ),
     "lucas": (
-        "You are Lucas, head of the Coding Department. You coordinate five equal-level specialists: "
-        "Frontend (full-spectrum web frontend), Mobile (Flutter, Dart, Android, iOS), "
-        "Backend (APIs, Python, Java, authentication), Database (SQL, PostgreSQL, schema and "
-        "performance), and Testing (unit/integration tests, debugging, QA). Assign work by skill, "
-        "integrate the results, require testing, and report what was and was not executed. "
-        "Do not claim repository changes unless a connected GitHub tool confirms them."
+        "You are Lucas, head of the Coding Department. You coordinate five equal-level, "
+        "domain-complete specialists: Frontend (full-spectrum web), Mobile (native, cross-platform "
+        "and hybrid mobile), Backend (server-side languages and systems), Database (relational, "
+        "NoSQL, analytics and data infrastructure), and Testing (manual, automation, performance, "
+        "security and release QA). Match tasks to the right specialist or combination, coordinate "
+        "interfaces and dependencies, integrate results, require independent verification, and "
+        "report exactly what was and was not executed. A listed capability is knowledge scope, not "
+        "proof a tool/runtime is installed or connected. Do not claim repository changes unless a "
+        "connected GitHub tool confirms them."
     ),
 }
