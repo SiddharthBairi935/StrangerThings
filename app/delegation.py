@@ -22,7 +22,7 @@ def create_lucas_plan(task: str) -> dict[str, object]:
     selected: list[str] = []
 
     keyword_groups = {
-        "frontend": ("react", "next.js", "nextjs", "html", "css", "web page", "frontend", "ui", "ux", "angular", "vue", "bootstrap", "tailwind"),
+        "frontend": ("react", "next.js", "nextjs", "html", "css", "web page", "website ui", "web ui", "frontend", "angular", "vue", "bootstrap", "tailwind"),
         "mobile": ("flutter", "dart", "android", "ios", "mobile", "app screen", "react native", "swift", "kotlin", "ionic"),
         "backend": ("api", "backend", "server", "python", "java", "authentication", "endpoint", "fastapi", "php", "laravel", "asp.net", ".net", "spring boot", "django", "node.js", "nestjs", "golang"),
         "database": ("database", "postgres", "postgresql", "sql", "schema", "migration", "query", "sqlite", "mongodb", "redis", "oracle", "dynamodb", "mysql"),
