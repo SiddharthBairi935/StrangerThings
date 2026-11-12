@@ -10,26 +10,17 @@
   - **Mike** — Google Drive files, folders and documents (requires Drive connection and permissions).
   - **Dustin** — day-to-day general research, comparisons, fact-checking and learning.
   - **Lucas** — head of the Coding Department.
-    - **Frontend Agent** — full-spectrum frontend engineering: HTML5, CSS3, JavaScript, TypeScript, Bootstrap, Tailwind CSS, Sass/SCSS, Less, React, Next.js, Angular, Vue, Nuxt, Svelte, SvelteKit, Astro, jQuery, state management, UI component libraries, responsive/mobile-first design, Figma-to-code, accessibility, API integration, frontend tooling, performance, SEO and frontend testing.
-    - **Mobile Agent** — Flutter, Dart, Android, iOS and mobile UX.
-    - **Backend Agent** — APIs, Python, Java, authentication and integrations.
-    - **Database Agent** — SQL, PostgreSQL, schema design and query optimization.
-    - **Testing Agent** — unit/integration testing, debugging and quality assurance.
+    - **Frontend Agent** — full-spectrum web development: HTML5, CSS3, JavaScript, TypeScript, Bootstrap, Tailwind, Sass/SCSS, Less, React, Next.js, Angular, Vue, Nuxt, Svelte, SvelteKit, Astro, jQuery, state management, UI libraries, responsive UX, accessibility, API integration, tooling, performance and frontend testing.
+    - **Mobile Agent** — native, cross-platform and hybrid apps: Flutter/Dart, React Native, Android/Kotlin/Java, iOS/Swift/SwiftUI, .NET MAUI, Xamarin, Ionic, Capacitor, Kotlin Multiplatform, device APIs, offline storage, notifications, mobile security, testing and store releases.
+    - **Backend Agent** — Java/Spring, Python/Django/Flask/FastAPI, PHP/Laravel, C#/.NET/ASP.NET, Node.js/Express/NestJS, Go, Ruby, Rust, C/C++, APIs, distributed systems, authentication, security, integrations and deployment.
+    - **Database Agent** — relational, NoSQL, cache, search, graph, time-series and cloud data platforms including PostgreSQL, MySQL, SQL Server, Oracle, SQLite, MongoDB, Redis, Cassandra, DynamoDB, Firebase/Firestore, schema design, optimization, migrations, backup, replication and security.
+    - **Testing Agent** — manual and automated QA across web, mobile, API and database layers; unit, integration, system, end-to-end, regression, performance, load, security, accessibility and release testing; Selenium, Playwright, Cypress, Appium, Jest, Vitest, Pytest, JUnit, Postman, JMeter and k6.
 
 Lucas's five coding specialists are peers at the same level. Lucas coordinates their work and reports to Eleven.
 
-## Frontend Agent capability scope
+## Specialist skill policy
 
-The Frontend Agent's declared capabilities cover:
-- Core: HTML5, CSS3, JavaScript/ES6+, TypeScript.
-- Styling: Bootstrap, Tailwind CSS, Sass/SCSS, Less.
-- Frameworks: React, Next.js, Angular, Vue, Nuxt, Svelte, SvelteKit, Astro, jQuery.
-- State and data: Redux/Redux Toolkit, Zustand, Context API, TanStack Query, REST, GraphQL and WebSocket.
-- UI systems: Material UI, Ant Design, Chakra UI and shadcn/ui.
-- UX and quality: responsive/mobile-first design, Figma-to-code, WCAG accessibility, cross-browser support, animation, SEO and Core Web Vitals.
-- Tooling and testing: Vite, Webpack, npm/yarn/pnpm, Git/GitHub, ESLint, Prettier, Jest, Vitest, React Testing Library, Cypress and Playwright.
-
-These are skill areas the agent is expected to understand and use when appropriate. A project should use only the technologies that fit its requirements; listing a capability does not mean every tool is installed, connected, or independently executable.
+Each specialist is expected to cover the broad, end-to-end skill set of its own domain rather than being limited to one framework or language. The capability registry is intentionally broad and can be extended as technologies evolve. For each project, Lucas should select technologies that fit the existing codebase, requirements, platform and operational constraints—not force every listed technology into one project. A declared skill means it is in the specialist's knowledge scope; it does not prove that a runtime, license, external account, device, or tool is installed or connected.
 
 ## Current implementation
 
@@ -38,13 +29,12 @@ These are skill areas the agent is expected to understand and use when appropria
 - Configurable OpenAI-compatible model provider.
 - Agent hierarchy registry at `GET /api/agents`.
 - Top-level department routing for Max, Will, Mike, Dustin, Lucas, or Eleven.
-- Expanded Frontend Agent capability registry and routing for common frontend technologies.
-- Authenticated Lucas delegation planner at `POST /api/lucas/delegate`; selects relevant coding specialists and always includes Testing.
-- Role-specific system instructions for each top-level department.
+- Broad capability registries and role instructions for all five Lucas coding specialists.
+- Lucas delegation planner at `POST /api/lucas/delegate`, which selects specialists from task keywords and always includes Testing.
 - User-approved memory endpoints.
 - GitHub Actions test workflow.
 
-**Important:** The hierarchy and role-aware routing are implemented. This is not yet a fully autonomous multi-agent system: Lucas currently creates a deterministic delegation plan; specialist agents do not independently execute code or call tools yet. Repository editing, command execution, Drive/LinkedIn connections, live research tools, voice, vision, approvals UI, and scheduled tasks still need implementation. A role marked active means its routing/instructions exist; it does not mean external integrations are connected.
+**Important:** The hierarchy, capability registry, role-aware prompts and deterministic routing/delegation planning are implemented. This is not yet a fully autonomous multi-agent system: Lucas currently creates a delegation plan; specialist agents do not independently execute code or call tools yet. Repository editing, command execution from the running assistant, Drive/LinkedIn connections, live research tools, voice, vision, approvals UI and scheduled tasks still need implementation. A role marked active means its registry/routing/instructions exist; it does not mean external integrations are connected.
 
 ## Local setup
 
