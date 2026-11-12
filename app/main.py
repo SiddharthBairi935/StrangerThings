@@ -1,9 +1,11 @@
 import secrets
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
@@ -78,8 +80,8 @@ class MemoryRequest(BaseModel):
 
 
 @app.get("/")
-async def root() -> dict[str, str]:
-    return {"name": settings.app_name, "status": "running", "stage": "private-brain-foundation"}
+async def root() -> FileResponse:
+    return FileResponse(Path(__file__).parent / "static" / "index.html")
 
 
 @app.get("/health")
