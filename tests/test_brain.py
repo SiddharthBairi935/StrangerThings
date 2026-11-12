@@ -31,6 +31,22 @@ class BrainFoundationTests(unittest.TestCase):
             ["Hello", "Hi"],
         )
 
+    def test_conversation_history_is_isolated_by_profile(self) -> None:
+        save_message(self.database_path, "shared-id", "user", "Owner message", "owner")
+        save_message(self.database_path, "shared-id", "user", "Other message", "other")
+        self.assertEqual(
+            [item["content"] for item in get_history(
+                self.database_path, "shared-id", profile_id="owner"
+            )],
+            ["Owner message"],
+        )
+        self.assertEqual(
+            [item["content"] for item in get_history(
+                self.database_path, "shared-id", profile_id="other"
+            )],
+            ["Other message"],
+        )
+
     def test_memory_is_saved_and_deleted_per_profile(self) -> None:
         self.assertTrue(save_memory(self.database_path, "p1", "Prefers concise answers"))
         self.assertFalse(save_memory(self.database_path, "p1", "Prefers concise answers"))
