@@ -16,6 +16,7 @@ def init_db(database_path: Path) -> None:
             """
             CREATE TABLE IF NOT EXISTS messages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile_id TEXT NOT NULL DEFAULT 'default',
                 conversation_id TEXT NOT NULL,
                 role TEXT NOT NULL CHECK(role IN ('user', 'assistant')),
                 content TEXT NOT NULL,
@@ -23,10 +24,15 @@ def init_db(database_path: Path) -> None:
             )
             """
         )
+        columns = {row["name"] for row in connection.execute("PRAGMA table_info(messages)")}
+        if "profile_id" not in columns:
+            connection.execute(
+                "ALTER TABLE messages ADD COLUMN profile_id TEXT NOT NULL DEFAULT 'default'"
+            )
         connection.execute(
             """
-            CREATE INDEX IF NOT EXISTS idx_messages_conversation
-            ON messages(conversation_id, id)
+            CREATE INDEX IF NOT EXISTS idx_messages_profile_conversation
+            ON messages(profile_id, conversation_id, id)
             """
         )
         connection.execute(
@@ -45,13 +51,19 @@ def init_db(database_path: Path) -> None:
         )
 
 
-def save_message(database_path: Path, conversation_id: str, role: str, content: str) -> None:
+def save_message(
+    database_path: Path,
+    conversation_id: str,
+    role: str,
+    content: str,
+    profile_id: str = "default",
+) -> None:
     if role not in {"user", "assistant"}:
         raise ValueError("Unsupported message role.")
     with _connect(database_path) as connection:
         connection.execute(
-            "INSERT INTO messages (conversation_id, role, content) VALUES (?, ?, ?)",
-            (conversation_id, role, content),
+            "INSERT INTO messages (profile_id, conversation_id, role, content) VALUES (?, ?, ?, ?)",
+            (profile_id, conversation_id, role, content),
         )
 
 
@@ -59,15 +71,16 @@ def get_history(
     database_path: Path,
     conversation_id: str,
     limit: int = 20,
+    profile_id: str = "default",
 ) -> list[dict[str, Any]]:
     with _connect(database_path) as connection:
         rows = connection.execute(
             """
             SELECT role, content FROM messages
-            WHERE conversation_id = ?
+            WHERE profile_id = ? AND conversation_id = ?
             ORDER BY id DESC LIMIT ?
             """,
-            (conversation_id, limit),
+            (profile_id, conversation_id, limit),
         ).fetchall()
     return [dict(row) for row in reversed(rows)]
 
