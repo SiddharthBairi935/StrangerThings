@@ -2,6 +2,7 @@ import unittest
 
 from app.agents import list_agents, route_agent
 from app.brain import build_system_prompt
+from app.delegation import create_lucas_plan
 
 
 class AgentHierarchyTests(unittest.TestCase):
@@ -39,6 +40,24 @@ class AgentHierarchyTests(unittest.TestCase):
         prompt = build_system_prompt("lucas", [{"content": "Prefers Hindi"}])
         self.assertIn("head of the Coding Department", prompt)
         self.assertIn("Prefers Hindi", prompt)
+
+    def test_flutter_task_routes_to_mobile_and_testing(self):
+        plan = create_lucas_plan("Fix the Flutter dashboard UI and test the screen")
+        self.assertEqual(plan["specialists"], ["mobile", "testing"])
+        self.assertFalse(plan["execution_started"])
+        self.assertEqual(plan["status"], "planned")
+
+    def test_full_stack_task_routes_to_multiple_specialists(self):
+        plan = create_lucas_plan(
+            "Build a React frontend with FastAPI backend and PostgreSQL database"
+        )
+        self.assertEqual(
+            plan["specialists"], ["frontend", "backend", "database", "testing"]
+        )
+
+    def test_generic_task_still_includes_testing(self):
+        plan = create_lucas_plan("Review this software project")
+        self.assertEqual(plan["specialists"], ["backend", "testing"])
 
 
 if __name__ == "__main__":
