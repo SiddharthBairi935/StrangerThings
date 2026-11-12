@@ -8,11 +8,11 @@ class SpecialistTask:
 
 
 SPECIALISTS = {
-    "frontend": "Implement or review web UI, React/Next.js components, styling, accessibility, and responsive behavior.",
-    "mobile": "Implement or review Flutter/Dart mobile screens, navigation, state, and platform-specific behavior.",
-    "backend": "Implement or review API endpoints, server logic, authentication, validation, and integrations.",
-    "database": "Design or review schemas, SQL queries, migrations, indexes, and data integrity.",
-    "testing": "Create and run appropriate unit, integration, and regression tests; report failures and coverage gaps.",
+    "frontend": "Own end-to-end web frontend delivery across HTML/CSS/JavaScript/TypeScript, all major web frameworks, UI systems, accessibility, APIs, performance, and frontend quality.",
+    "mobile": "Own native, cross-platform, and hybrid mobile delivery across Flutter, React Native, Android, iOS, .NET MAUI, Ionic, device capabilities, app security, testing, and store releases.",
+    "backend": "Own server-side delivery across Java, Python, PHP, .NET/C#, Node.js, Go, Ruby, C/C++, APIs, distributed systems, security, integrations, and deployment.",
+    "database": "Own data architecture and operations across SQL, relational, NoSQL, cache, search, graph, time-series, and cloud data platforms, including modeling, reliability, security, and performance.",
+    "testing": "Own quality engineering across manual and automated testing, web/mobile/API/database layers, unit through end-to-end tests, performance, security, accessibility, release validation, and reporting.",
 }
 
 
@@ -22,10 +22,10 @@ def create_lucas_plan(task: str) -> dict[str, object]:
     selected: list[str] = []
 
     keyword_groups = {
-        "frontend": ("react", "next.js", "nextjs", "html", "css", "web page", "frontend", "ui", "ux"),
-        "mobile": ("flutter", "dart", "android", "ios", "mobile", "app screen"),
-        "backend": ("api", "backend", "server", "python", "java", "authentication", "endpoint", "fastapi"),
-        "database": ("database", "postgres", "postgresql", "sql", "schema", "migration", "query", "sqlite"),
+        "frontend": ("react", "next.js", "nextjs", "html", "css", "web page", "frontend", "ui", "ux", "angular", "vue", "bootstrap", "tailwind"),
+        "mobile": ("flutter", "dart", "android", "ios", "mobile", "app screen", "react native", "swift", "kotlin", "ionic"),
+        "backend": ("api", "backend", "server", "python", "java", "authentication", "endpoint", "fastapi", "php", "laravel", "asp.net", ".net", "spring boot", "django", "node.js", "nestjs", "golang"),
+        "database": ("database", "postgres", "postgresql", "sql", "schema", "migration", "query", "sqlite", "mongodb", "redis", "oracle", "dynamodb", "mysql"),
     }
     for agent, keywords in keyword_groups.items():
         if any(keyword in normalized for keyword in keywords):
