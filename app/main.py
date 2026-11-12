@@ -1,29 +1,98 @@
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Literal
+from uuid import uuid4
 
-from fastapi import FastAPI
+import httpx
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
+from app.database import init_db, save_message, get_history
 
 settings = get_settings()
 
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db(settings.database_path)
+    yield
+
+
 app = FastAPI(
     title=settings.app_name,
-    version="0.1.0",
+    version="0.2.0",
     description="Private personal AI assistant backend.",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=12000)
-    language: Literal["auto", "en", "hi", "hinglish"] = "auto"
+    conversation_id: str | None = None
 
 
 class ChatResponse(BaseModel):
+    conversation_id: str
     assistant: str
-    status: Literal["model_not_configured", "ok"]
+    status: str
     agent: str = "orchestrator"
+
+
+async def generate_reply(conversation_id: str, message: str) -> tuple[str, str]:
+    if not settings.llm_api_key or not settings.llm_model:
+        return (
+            "Eleven का backend चालू है और आपकी बातचीत सुरक्षित रूप से सेव हो गई है। "
+            "AI जवाब चालू करने के लिए LLM provider की settings configure करनी बाकी हैं।",
+            "model_not_configured",
+        )
+
+    history = get_history(settings.database_path, conversation_id, limit=20)
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are Eleven, a helpful personal AI assistant. "
+                "Reply in the language used by the user. Be honest about capabilities "
+                "and never claim an action was completed unless it actually was."
+            ),
+        }
+    ]
+    messages.extend(
+        {"role": item["role"], "content": item["content"]}
+        for item in history
+        if item["role"] in {"user", "assistant"}
+    )
+    messages.append({"role": "user", "content": message})
+
+    url = settings.llm_base_url.rstrip("/") + "/v1/chat/completions"
+    try:
+        async with httpx.AsyncClient(timeout=settings.llm_timeout_seconds) as client:
+            response = await client.post(
+                url,
+                headers={"Authorization": f"Bearer {settings.llm_api_key}"},
+                json={"model": settings.llm_model, "messages": messages},
+            )
+            response.raise_for_status()
+            data = response.json()
+            answer = data["choices"][0]["message"]["content"]
+            if not isinstance(answer, str) or not answer.strip():
+                raise ValueError("Provider returned an empty assistant message.")
+            return answer.strip(), "ok"
+    except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
+        # Do not leak provider credentials or raw upstream responses to clients.
+        raise HTTPException(
+            status_code=502,
+            detail="The configured AI provider could not complete the request.",
+        ) from exc
 
 
 @app.get("/")
@@ -39,23 +108,14 @@ async def health() -> dict[str, str]:
     }
 
 
-@app.post("/api/v1/chat", response_model=ChatResponse)
+@app.post("/api/chat", response_model=ChatResponse)
 async def chat(payload: ChatRequest) -> ChatResponse:
-    # The model adapter is intentionally not faked. It will be added once
-    # the provider and model are selected and configured securely.
-    if not settings.ai_provider or not settings.ai_api_key or not settings.ai_model:
-        return ChatResponse(
-            assistant=(
-                "Eleven का backend चालू है, लेकिन AI model अभी configure नहीं हुआ है. "
-                "अगले चरण में सुरक्षित तरीके से model provider जोड़ेंगे."
-            ),
-            status="model_not_configured",
-        )
-
+    conversation_id = payload.conversation_id or str(uuid4())
+    save_message(settings.database_path, conversation_id, "user", payload.message)
+    answer, status = await generate_reply(conversation_id, payload.message)
+    save_message(settings.database_path, conversation_id, "assistant", answer)
     return ChatResponse(
-        assistant=(
-            "AI provider की settings मिल गई हैं. वास्तविक model adapter अभी "
-            "अगले development चरण में जोड़ा जाएगा."
-        ),
-        status="model_not_configured",
+        conversation_id=conversation_id,
+        assistant=answer,
+        status=status,
     )
