@@ -20,7 +20,28 @@ AGENTS: tuple[AgentInfo, ...] = (
     AgentInfo("mike", "Mike", "Google Drive: find, organize, read, summarize, and manage files with connected and approved Drive access.", "planned", "eleven", ("drive", "files", "documents")),
     AgentInfo("dustin", "Dustin", "General day-to-day research, comparisons, fact-checking, learning, and evidence-based recommendations.", "active", "eleven", ("research", "compare", "fact_check")),
     AgentInfo("lucas", "Lucas", "Head of the Coding Department. Delegates engineering work to five equal-level coding specialists and coordinates their results.", "active", "eleven", ("software_development", "code_review", "coordination")),
-    AgentInfo("frontend", "Frontend Agent", "Web frontend: React, Next.js, HTML, CSS, accessibility, responsive layouts, and UI/UX.", "active", "lucas", ("react", "nextjs", "html", "css", "ui_ux")),
+    AgentInfo(
+        "frontend",
+        "Frontend Agent",
+        "Full-spectrum frontend engineering: semantic HTML, CSS, JavaScript, TypeScript, UI frameworks, component libraries, responsive UX, accessibility, API integration, frontend tooling, performance, and testing.",
+        "active",
+        "lucas",
+        (
+            "html", "html5", "css", "css3", "javascript", "es6_plus", "typescript",
+            "bootstrap", "tailwind_css", "sass", "scss", "less",
+            "react", "react_js", "nextjs", "angular", "vue", "nuxt",
+            "svelte", "sveltekit", "astro", "jquery",
+            "redux", "redux_toolkit", "zustand", "context_api", "tanstack_query",
+            "material_ui", "mui", "ant_design", "chakra_ui", "shadcn_ui",
+            "responsive_design", "mobile_first", "ui_ux", "figma_to_code",
+            "accessibility", "wcag", "cross_browser", "animations",
+            "rest_api", "graphql", "websocket", "authentication_integration",
+            "vite", "webpack", "npm", "yarn", "pnpm", "git", "github",
+            "eslint", "prettier", "jest", "vitest", "react_testing_library",
+            "cypress", "playwright", "seo", "core_web_vitals",
+            "performance_optimization", "lazy_loading", "code_splitting",
+        ),
+    ),
     AgentInfo("mobile", "Mobile Agent", "Mobile applications: Flutter, Dart, Android, iOS, responsive mobile UX, and app integration.", "active", "lucas", ("flutter", "dart", "android", "ios")),
     AgentInfo("backend", "Backend Agent", "Server-side engineering: APIs, Python, Java, authentication, business logic, and integrations.", "active", "lucas", ("apis", "python", "java", "authentication")),
     AgentInfo("database", "Database Agent", "Database engineering: SQL, PostgreSQL, schema design, query optimization, migrations, and data security.", "active", "lucas", ("sql", "postgresql", "schema", "optimization")),
@@ -54,8 +75,9 @@ def route_agent(message: str) -> str:
         ("mike", ("google drive", "drive file", "drive folder", "my documents", "file in drive",
                   "गूगल ड्राइव")),
         ("lucas", ("debug", "bug", "stack trace", "exception", "python", "javascript",
-                   "typescript", "flutter", "dart", "react", "next.js", "nextjs", "sql",
-                   "database", "api", "code", "coding", "program", "function", "github repo",
+                   "typescript", "flutter", "dart", "react", "next.js", "nextjs", "angular",
+                   "vue.js", "vue", "svelte", "html", "css", "bootstrap", "tailwind",
+                   "sql", "database", "api", "code", "coding", "program", "function", "github repo",
                    "ऐप बनाओ", "कोड")),
         ("dustin", ("research", "investigate", "compare", "comparison", "sources",
                     "latest information", "market analysis", "competitor", "fact check",
@@ -96,7 +118,7 @@ AGENT_INSTRUCTIONS = {
     ),
     "lucas": (
         "You are Lucas, head of the Coding Department. You coordinate five equal-level specialists: "
-        "Frontend (React, Next.js, HTML, CSS, UI/UX), Mobile (Flutter, Dart, Android, iOS), "
+        "Frontend (full-spectrum web frontend), Mobile (Flutter, Dart, Android, iOS), "
         "Backend (APIs, Python, Java, authentication), Database (SQL, PostgreSQL, schema and "
         "performance), and Testing (unit/integration tests, debugging, QA). Assign work by skill, "
         "integrate the results, require testing, and report what was and was not executed. "
