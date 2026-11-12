@@ -1,9 +1,11 @@
+import secrets
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from app.agents import list_agents
@@ -18,6 +20,7 @@ from app.database import (
 )
 
 settings = get_settings()
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 @asynccontextmanager
@@ -28,8 +31,8 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
-    version="0.3.0",
-    description="Eleven personal AI assistant brain API.",
+    version="0.4.0",
+    description="Private personal AI assistant brain API.",
     lifespan=lifespan,
 )
 
@@ -42,10 +45,25 @@ app.add_middleware(
 )
 
 
+async def require_owner(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+) -> str:
+    expected = settings.api_access_token
+    if not expected:
+        raise HTTPException(
+            status_code=503,
+            detail="Private API access is not configured. Set ELEVEN_API_TOKEN on the server.",
+        )
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise HTTPException(status_code=401, detail="A valid Eleven access token is required.")
+    if not secrets.compare_digest(credentials.credentials, expected):
+        raise HTTPException(status_code=401, detail="A valid Eleven access token is required.")
+    return settings.owner_profile_id
+
+
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=12000)
-    conversation_id: str | None = None
-    profile_id: str = Field(default="default", min_length=1, max_length=100)
+    conversation_id: str | None = Field(default=None, min_length=1, max_length=100)
 
 
 class ChatResponse(BaseModel):
@@ -57,12 +75,11 @@ class ChatResponse(BaseModel):
 
 class MemoryRequest(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
-    profile_id: str = Field(default="default", min_length=1, max_length=100)
 
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    return {"name": settings.app_name, "status": "running", "stage": "brain-foundation"}
+    return {"name": settings.app_name, "status": "running", "stage": "private-brain-foundation"}
 
 
 @app.get("/health")
@@ -76,23 +93,25 @@ async def agents() -> dict[str, object]:
 
 
 @app.post("/api/chat", response_model=ChatResponse)
-async def chat(payload: ChatRequest) -> ChatResponse:
+async def chat(
+    payload: ChatRequest,
+    profile_id: str = Depends(require_owner),
+) -> ChatResponse:
     conversation_id = payload.conversation_id or str(uuid4())
     agent_name = select_agent(payload.message)
-
-    # Store the user turn first. If the model call fails, it remains available for retry/debug.
-    save_message(settings.database_path, conversation_id, "user", payload.message)
-    try:
-        answer = await generate_reply(
-            settings,
-            settings.database_path,
-            payload.profile_id,
-            conversation_id,
-            agent_name,
-        )
-    except HTTPException:
-        raise
-    save_message(settings.database_path, conversation_id, "assistant", answer)
+    save_message(
+        settings.database_path, conversation_id, "user", payload.message, profile_id
+    )
+    answer = await generate_reply(
+        settings,
+        settings.database_path,
+        profile_id,
+        conversation_id,
+        agent_name,
+    )
+    save_message(
+        settings.database_path, conversation_id, "assistant", answer, profile_id
+    )
     return ChatResponse(
         conversation_id=conversation_id,
         assistant=answer,
@@ -102,18 +121,27 @@ async def chat(payload: ChatRequest) -> ChatResponse:
 
 
 @app.get("/api/memory")
-async def memories(profile_id: str = "default") -> dict[str, object]:
+async def memories(profile_id: str = Depends(require_owner)) -> dict[str, object]:
     return {"memories": get_memories(settings.database_path, profile_id, limit=100)}
 
 
 @app.post("/api/memory")
-async def remember(payload: MemoryRequest) -> dict[str, object]:
-    created = save_memory(settings.database_path, payload.profile_id, payload.content)
-    return {"saved": created, "memories": get_memories(settings.database_path, payload.profile_id)}
+async def remember(
+    payload: MemoryRequest,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, object]:
+    created = save_memory(settings.database_path, profile_id, payload.content)
+    return {
+        "saved": created,
+        "memories": get_memories(settings.database_path, profile_id),
+    }
 
 
 @app.delete("/api/memory/{memory_id}")
-async def forget(memory_id: int, profile_id: str = "default") -> dict[str, bool]:
+async def forget(
+    memory_id: int,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, bool]:
     deleted = delete_memory(settings.database_path, profile_id, memory_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Memory not found.")
