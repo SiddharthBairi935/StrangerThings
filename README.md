@@ -34,7 +34,7 @@ Each specialist is expected to cover the broad, end-to-end skill set of its own 
 - User-approved memory endpoints.
 - GitHub Actions test workflow.
 
-**Important:** The hierarchy, capability registry, role-aware prompts and deterministic routing/delegation planning are implemented. This is not yet a fully autonomous multi-agent system: Lucas currently creates a delegation plan; specialist agents do not independently execute code or call tools yet. Repository editing, command execution from the running assistant, Drive/LinkedIn connections, live research tools, voice, vision, approvals UI and scheduled tasks still need implementation. A role marked active means its registry/routing/instructions exist; it does not mean external integrations are connected.
+**Important:** Lucas now performs multi-specialist LLM orchestration: relevant domain specialists produce proposals, Testing reviews them, and Lucas synthesizes a final response. These are role-separated calls to the configured model, not separate independently hosted models. This is not yet an autonomous software execution environment: the agents cannot run shell commands, edit repository files from the running app, execute tests, or deploy. GitHub write access, command execution, Drive/LinkedIn connections, live research tools, voice, vision, approvals UI and scheduled tasks still need implementation. A registered capability describes knowledge scope; it does not mean a runtime, external account, or tool is connected.
 
 ## Local setup
 
