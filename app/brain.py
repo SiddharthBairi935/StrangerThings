@@ -40,7 +40,7 @@ async def generate_reply(
             detail="AI provider is not configured. Set LLM_API_KEY and LLM_MODEL on the server.",
         )
 
-    history = get_history(database_path, conversation_id, limit=20)
+    history = get_history(database_path, conversation_id, limit=20, profile_id=profile_id)
     memories = get_memories(database_path, profile_id, limit=30)
     messages = [{"role": "system", "content": build_system_prompt(agent_name, memories)}]
     messages.extend(
