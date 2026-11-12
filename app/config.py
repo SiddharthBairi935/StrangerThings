@@ -12,23 +12,15 @@ class Settings(BaseSettings):
     port: int = 8000
     log_level: str = "INFO"
 
-    llm_api_key: str | None = Field(default=None, validation_alias="LLM_API_KEY")
-    llm_base_url: str = Field(
-        default="https://api.openai.com",
-        validation_alias="LLM_BASE_URL",
-    )
-    llm_model: str | None = Field(default=None, validation_alias="LLM_MODEL")
-    llm_timeout_seconds: float = Field(
-        default=45.0,
-        validation_alias="LLM_TIMEOUT_SECONDS",
-        gt=0,
-        le=180,
-    )
+    api_access_token: str | None = Field(default=None, validation_alias="ELEVEN_API_TOKEN")
+    owner_profile_id: str = Field(default="owner", validation_alias="OWNER_PROFILE_ID")
 
-    database_path: Path = Field(
-        default=Path("./data/eleven.db"),
-        validation_alias="DATABASE_PATH",
-    )
+    llm_api_key: str | None = Field(default=None, validation_alias="LLM_API_KEY")
+    llm_base_url: str = Field(default="https://api.openai.com", validation_alias="LLM_BASE_URL")
+    llm_model: str | None = Field(default=None, validation_alias="LLM_MODEL")
+    llm_timeout_seconds: float = Field(default=45.0, validation_alias="LLM_TIMEOUT_SECONDS", gt=0, le=180)
+
+    database_path: Path = Field(default=Path("./data/eleven.db"), validation_alias="DATABASE_PATH")
     cors_origins: str = Field(
         default="http://localhost:3000,http://127.0.0.1:3000",
         validation_alias="CORS_ORIGINS",
