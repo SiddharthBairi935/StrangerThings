@@ -1,98 +1,106 @@
 # StrangerThings — Eleven Personal AI Assistant
 
-**StrangerThings** is the project repository. **Eleven** is the personal AI assistant being built inside it.
+**StrangerThings** is the project repository. **Eleven (L)** is the personal AI assistant being built inside it.
 
-Eleven is designed around a central brain/orchestrator, specialist agents, user-approved memory, and a private self-hosted backend. This repository is under active development; it is not yet a production-ready assistant.
+Eleven is designed around one central brain, specialist agents, approved personal memory, and a private interface for chat and voice. This repository is under active development and is not yet production-ready.
 
-## Current brain foundation
+## Current foundation
 
-- FastAPI backend with health endpoint.
-- Chat API with conversation IDs and SQLite conversation history.
-- Configurable OpenAI-compatible chat-completions provider.
-- Central brain prompt with relevant user-approved memories.
-- Basic routing between general, coding, and research model roles.
-- Agent registry endpoint: `GET /api/agents`.
-- Memory endpoints: `GET/POST /api/memory` and `DELETE /api/memory/{memory_id}`.
-- Tests for memory isolation, conversation ordering, prompt context, and basic routing.
+- FastAPI backend and health endpoint.
+- Chat API with SQLite conversation history.
+- Configurable OpenAI-compatible model provider.
+- General, coding, and research prompt roles with basic routing.
+- Agent registry at `GET /api/agents`.
+- Explicit user-approved memory endpoints.
+- Private owner-token authentication for chat and memory APIs.
+- Conversation history and memories are scoped to the authenticated owner profile.
+- GitHub Actions test workflow.
 
 ## Agent status
 
 | Agent | Status | Notes |
 |---|---|---|
 | General | Active | Uses configured LLM |
-| Coding | Active | Prompt-specialized LLM role; no shell or repository write tools yet |
-| Research | Active | Prompt-specialized LLM role; no live web search tool yet |
-| GitHub | Planned | Needs scoped GitHub integration and approval checks |
+| Coding | Active | Prompt-specialized role; no shell or repository write tools yet |
+| Research | Active | Prompt-specialized role; no live web search tool yet |
+| GitHub | Planned | Needs scoped integration and approval checks |
 | Google Drive | Planned | Needs OAuth and Drive API integration |
-| Voice | Planned | Speech-to-text and text-to-speech pipeline |
-| Vision | Planned | Image understanding; face recognition requires extra privacy safeguards |
-| Tasks | Planned | Background worker and scheduler not connected |
+| Voice | Planned | Speech-to-text and text-to-speech |
+| Vision | Planned | Image understanding; face recognition needs additional safeguards |
+| Tasks | Planned | Background worker and scheduler |
 
-"Active" means the role can be selected and handled by the configured language model. It does not mean external tools are connected.
+"Active" means a prompt role can be selected by the model. It does not mean external tools or autonomous task execution are connected.
 
-## Requirements
+## Requirements and local setup
 
 - Python 3.11+
 - pip
 
-## Run locally
-
 ```bash
 python -m venv .venv
-# Activate the virtual environment for your operating system
 pip install -r requirements.txt
 cp .env.example .env
+```
+
+Set these values in your private `.env` file:
+- `ELEVEN_API_TOKEN`: a long, random secret used by your private client.
+- `LLM_API_KEY` and `LLM_MODEL`: credentials and model name for your chosen OpenAI-compatible provider.
+- `LLM_BASE_URL`: change only if your provider uses a different API base URL.
+
+Generate a token locally with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Never commit the real `.env` file or share the token in chat.
+
+Start the API:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-Set `LLM_API_KEY`, `LLM_MODEL`, and if required `LLM_BASE_URL` in your private `.env` file. Never commit real credentials.
-
 - Health: `http://127.0.0.1:8000/health`
-- API documentation: `http://127.0.0.1:8000/docs`
-- Agent registry: `GET /api/agents`
+- API docs: `http://127.0.0.1:8000/docs`
+- Agent registry: `GET /api/agents` (public capability metadata)
 
-## Chat
+## Authenticated API
 
-`POST /api/chat`
+Send the owner token on private endpoints:
+
+```http
+Authorization: Bearer YOUR_ELEVEN_API_TOKEN
+```
+
+Chat: `POST /api/chat`
 
 ```json
 {
   "message": "Help me plan the next development milestone",
-  "conversation_id": null,
-  "profile_id": "default"
+  "conversation_id": null
 }
 ```
 
-Reuse the returned `conversation_id` to continue the same conversation. Use a stable profile ID for memory across conversations.
+Reuse the returned `conversation_id` to continue the same conversation. The server assigns the owner profile; clients cannot choose another profile.
 
-## Memory
-
-`POST /api/memory`
+Memory: `POST /api/memory`
 
 ```json
 {
-  "profile_id": "default",
   "content": "The user prefers concise answers in Hindi."
 }
 ```
 
-Memory is explicitly saved through the memory endpoint. Do not store sensitive information. List with `GET /api/memory?profile_id=default`; delete an entry with `DELETE /api/memory/{memory_id}?profile_id=default`.
+List memories with `GET /api/memory`; delete one with `DELETE /api/memory/{memory_id}`. All these endpoints require the owner token and use the server-configured owner profile.
 
-## Important security limitations before deployment
+If `ELEVEN_API_TOKEN` is not configured, private endpoints fail closed with HTTP 503. Missing or incorrect tokens receive HTTP 401.
 
-- The current API has no user authentication or authorization. Do not expose it publicly yet.
-- The default profile ID is a development convenience, not a secure identity boundary.
-- Configure HTTPS, authentication, per-user data isolation, rate limiting, CORS for the real frontend origin, backups, and secret management before public use.
-- Never commit `.env`, API keys, SSH keys, database files, or personal data.
-- Face recognition must never be the only factor authorizing sensitive actions.
+## Deployment warning
+
+Do not expose this API publicly yet. Authentication is now present for the single-owner development setup, but production still needs HTTPS/reverse-proxy configuration, rate limiting, stricter operational controls, backups, monitoring, frontend-origin configuration, and end-to-end security testing. The provider key and owner token must live only in server-side secrets.
 
 ## Roadmap
 
-1. Complete and test brain foundation.
-2. Add secure user accounts and memory ownership.
-3. Connect GitHub and Google Drive agents with least-privilege scopes and approvals.
-4. Add live research tools and controlled coding execution.
-5. Add voice and vision services.
-6. Build a responsive iPhone-friendly web app/PWA.
-7. Add background jobs, monitoring, backups, and production hardening.
-8. Deploy to the Hostinger VPS only after security and integration tests pass.
+1. Finish backend security and API tests.
+2. Add actual task delegation and safe tool execution.
+3. Connect GitHub, Google Drive, and live research with least-privilege permissions and approvals.
+4. Build the Eleven chat interface and voice pipeline.
+5. Add vision and background tasks.
+6. Build the responsive iPhone-friendly PWA.
+7. Complete end-to-end tests and production hardening.
+8. Deploy to Hostinger only after the security checks pass.
