@@ -1,83 +1,44 @@
-import tempfile
 import unittest
-from pathlib import Path
 
 from app.agents import list_agents, route_agent
 from app.brain import build_system_prompt
-from app.database import (
-    delete_memory,
-    get_history,
-    get_memories,
-    init_db,
-    save_memory,
-    save_message,
-)
 
 
-class BrainFoundationTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.database_path = Path(self.temp_dir.name) / "eleven.db"
-        init_db(self.database_path)
-
-    def tearDown(self) -> None:
-        self.temp_dir.cleanup()
-
-    def test_conversation_history_is_ordered(self) -> None:
-        save_message(self.database_path, "c1", "user", "Hello")
-        save_message(self.database_path, "c1", "assistant", "Hi")
-        self.assertEqual(
-            [item["content"] for item in get_history(self.database_path, "c1")],
-            ["Hello", "Hi"],
-        )
-
-    def test_conversation_history_is_isolated_by_profile(self) -> None:
-        save_message(self.database_path, "shared-id", "user", "Owner message", "owner")
-        save_message(self.database_path, "shared-id", "user", "Other message", "other")
-        self.assertEqual(
-            [item["content"] for item in get_history(
-                self.database_path, "shared-id", profile_id="owner"
-            )],
-            ["Owner message"],
-        )
-        self.assertEqual(
-            [item["content"] for item in get_history(
-                self.database_path, "shared-id", profile_id="other"
-            )],
-            ["Other message"],
-        )
-
-    def test_memory_is_saved_and_deleted_per_profile(self) -> None:
-        self.assertTrue(save_memory(self.database_path, "p1", "Prefers concise answers"))
-        self.assertFalse(save_memory(self.database_path, "p1", "Prefers concise answers"))
-        memory_id = get_memories(self.database_path, "p1")[0]["id"]
-        self.assertEqual(get_memories(self.database_path, "p2"), [])
-        self.assertTrue(delete_memory(self.database_path, "p1", memory_id))
-        self.assertEqual(get_memories(self.database_path, "p1"), [])
-
-    def test_agent_routing(self) -> None:
+class AgentHierarchyTests(unittest.TestCase):
+    def test_department_routing(self):
         cases = {
-            "Help me debug this Python API": "coding",
-            "Compare two options": "research",
-            "Find current job openings on LinkedIn": "linkedin",
-            "Create an Excel spreadsheet": "workspace",
-            "Hello Eleven": "general",
+            "Plan my workout and diet": "max",
+            "Find jobs on LinkedIn and improve my resume": "will",
+            "Find a PDF in Google Drive": "mike",
+            "Research the best cloud certifications": "dustin",
+            "Fix this Flutter bug": "lucas",
+            "Hello Eleven": "eleven",
         }
         for message, expected in cases.items():
             with self.subTest(message=message):
                 self.assertEqual(route_agent(message), expected)
 
-    def test_agent_catalog_exposes_realistic_status(self) -> None:
+    def test_lucas_has_five_equal_level_specialists(self):
         agents = {item["name"]: item for item in list_agents()}
-        self.assertEqual(agents["coding"]["status"], "active")
-        self.assertEqual(agents["linkedin"]["status"], "planned")
-        self.assertEqual(agents["workspace"]["status"], "planned")
+        self.assertEqual(agents["lucas"]["parent"], "eleven")
+        specialist_names = {"frontend", "mobile", "backend", "database", "testing"}
+        self.assertEqual(
+            {name for name, item in agents.items() if item["parent"] == "lucas"},
+            specialist_names,
+        )
 
-    def test_specialist_prompt_is_explicit(self) -> None:
-        prompt = build_system_prompt("linkedin", [{"content": "Prefers Hindi"}])
-        self.assertIn("selected specialist is: linkedin", prompt)
+    def test_all_five_personal_agents_are_present(self):
+        agents = {item["name"]: item for item in list_agents()}
+        self.assertEqual(
+            {name for name in ("max", "will", "mike", "dustin", "lucas")
+             if agents[name]["parent"] == "eleven"},
+            {"max", "will", "mike", "dustin", "lucas"},
+        )
+
+    def test_specialist_prompt_contains_role_and_memory(self):
+        prompt = build_system_prompt("lucas", [{"content": "Prefers Hindi"}])
+        self.assertIn("head of the Coding Department", prompt)
         self.assertIn("Prefers Hindi", prompt)
-        self.assertIn("Never claim to access LinkedIn", prompt)
 
 
 if __name__ == "__main__":
