@@ -7,6 +7,8 @@ Eleven is designed around one central brain, specialist agents, approved persona
 ## Current foundation
 
 - FastAPI backend and health endpoint.
+- Responsive Eleven chat workspace served at `/` (desktop and mobile layouts).
+- Browser chat connects to the private API using a tab-only owner token; it is not persisted in local storage.
 - Chat API with SQLite conversation history.
 - Configurable OpenAI-compatible model provider.
 - General, coding, and research prompt roles with basic routing.
@@ -55,9 +57,14 @@ Start the API:
 uvicorn app.main:app --reload
 ```
 
+- Eleven interface: `http://127.0.0.1:8000/`
 - Health: `http://127.0.0.1:8000/health`
 - API docs: `http://127.0.0.1:8000/docs`
 - Agent registry: `GET /api/agents` (public capability metadata)
+
+## Eleven chat interface
+
+Open `http://127.0.0.1:8000/` after starting the server. Paste the `ELEVEN_API_TOKEN` value from your private server `.env` into the connection field. The browser keeps the token in memory for the current tab only; refreshing or closing the tab clears it. The interface currently supports text chat and displays the selected prompt role. Voice, real integrations, agent delegation, and task approvals are not connected yet.
 
 ## Authenticated API
 
