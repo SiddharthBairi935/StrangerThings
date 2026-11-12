@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.agents import route_agent
+from app.agents import list_agents, route_agent
 from app.brain import build_system_prompt
 from app.database import (
     delete_memory,
@@ -56,13 +56,28 @@ class BrainFoundationTests(unittest.TestCase):
         self.assertEqual(get_memories(self.database_path, "p1"), [])
 
     def test_agent_routing(self) -> None:
-        self.assertEqual(route_agent("Help me debug this Python API"), "coding")
-        self.assertEqual(route_agent("Compare two options"), "research")
-        self.assertEqual(route_agent("Hello Eleven"), "general")
+        cases = {
+            "Help me debug this Python API": "coding",
+            "Compare two options": "research",
+            "Find current job openings on LinkedIn": "linkedin",
+            "Create an Excel spreadsheet": "workspace",
+            "Hello Eleven": "general",
+        }
+        for message, expected in cases.items():
+            with self.subTest(message=message):
+                self.assertEqual(route_agent(message), expected)
 
-    def test_prompt_includes_user_approved_memory(self) -> None:
-        prompt = build_system_prompt("general", [{"content": "Prefers Hindi"}])
+    def test_agent_catalog_exposes_realistic_status(self) -> None:
+        agents = {item["name"]: item for item in list_agents()}
+        self.assertEqual(agents["coding"]["status"], "active")
+        self.assertEqual(agents["linkedin"]["status"], "planned")
+        self.assertEqual(agents["workspace"]["status"], "planned")
+
+    def test_specialist_prompt_is_explicit(self) -> None:
+        prompt = build_system_prompt("linkedin", [{"content": "Prefers Hindi"}])
+        self.assertIn("selected specialist is: linkedin", prompt)
         self.assertIn("Prefers Hindi", prompt)
+        self.assertIn("Never claim to access LinkedIn", prompt)
 
 
 if __name__ == "__main__":
