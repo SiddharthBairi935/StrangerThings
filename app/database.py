@@ -29,14 +29,23 @@ def init_db(database_path: Path) -> None:
             ON messages(conversation_id, id)
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS memories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile_id TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(profile_id, content)
+            )
+            """
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_memories_profile ON memories(profile_id, id)"
+        )
 
 
-def save_message(
-    database_path: Path,
-    conversation_id: str,
-    role: str,
-    content: str,
-) -> None:
+def save_message(database_path: Path, conversation_id: str, role: str, content: str) -> None:
     if role not in {"user", "assistant"}:
         raise ValueError("Unsupported message role.")
     with _connect(database_path) as connection:
@@ -54,12 +63,48 @@ def get_history(
     with _connect(database_path) as connection:
         rows = connection.execute(
             """
-            SELECT role, content
-            FROM messages
+            SELECT role, content FROM messages
             WHERE conversation_id = ?
-            ORDER BY id DESC
-            LIMIT ?
+            ORDER BY id DESC LIMIT ?
             """,
             (conversation_id, limit),
         ).fetchall()
     return [dict(row) for row in reversed(rows)]
+
+
+def save_memory(database_path: Path, profile_id: str, content: str) -> bool:
+    cleaned = content.strip()
+    if not cleaned:
+        raise ValueError("Memory content cannot be empty.")
+    with _connect(database_path) as connection:
+        cursor = connection.execute(
+            "INSERT OR IGNORE INTO memories (profile_id, content) VALUES (?, ?)",
+            (profile_id, cleaned),
+        )
+        return cursor.rowcount > 0
+
+
+def get_memories(
+    database_path: Path,
+    profile_id: str,
+    limit: int = 30,
+) -> list[dict[str, Any]]:
+    with _connect(database_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT id, content, created_at FROM memories
+            WHERE profile_id = ?
+            ORDER BY id DESC LIMIT ?
+            """,
+            (profile_id, limit),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def delete_memory(database_path: Path, profile_id: str, memory_id: int) -> bool:
+    with _connect(database_path) as connection:
+        cursor = connection.execute(
+            "DELETE FROM memories WHERE profile_id = ? AND id = ?",
+            (profile_id, memory_id),
+        )
+        return cursor.rowcount > 0
