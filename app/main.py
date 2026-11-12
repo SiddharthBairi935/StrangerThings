@@ -5,8 +5,8 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
@@ -20,6 +20,7 @@ from app.database import (
     save_memory,
     save_message,
 )
+from app.delegation import create_lucas_plan
 
 settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -33,7 +34,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
-    version="0.4.0",
+    version="0.5.0",
     description="Private personal AI assistant brain API.",
     lifespan=lifespan,
 )
@@ -79,6 +80,10 @@ class MemoryRequest(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
 
 
+class LucasDelegationRequest(BaseModel):
+    task: str = Field(min_length=1, max_length=12000)
+
+
 @app.get("/")
 async def root() -> FileResponse:
     return FileResponse(Path(__file__).parent / "static" / "index.html")
@@ -92,6 +97,14 @@ async def health() -> dict[str, str]:
 @app.get("/api/agents")
 async def agents() -> dict[str, object]:
     return {"agents": list_agents()}
+
+
+@app.post("/api/lucas/delegate")
+async def lucas_delegate(
+    payload: LucasDelegationRequest,
+    _: str = Depends(require_owner),
+) -> dict[str, object]:
+    return create_lucas_plan(payload.task)
 
 
 @app.post("/api/chat", response_model=ChatResponse)
