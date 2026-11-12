@@ -1,17 +1,18 @@
 # Eleven — Personal AI Assistant
 
-Eleven is a private, self-hosted personal AI assistant. The first milestone is a small, reliable API with persistent conversation history and a provider-neutral LLM connection. The architecture is intended to grow into a multi-agent system, integrations, voice, and a mobile-friendly interface.
+Eleven is a private, self-hosted personal AI assistant. The first milestone is a reliable API with persistent conversation history and a provider-neutral LLM connection. The architecture can grow into a multi-agent system, integrations, voice, and a mobile-friendly interface.
 
-## Current milestone
+## Implemented in the current foundation
 
-- FastAPI backend with a health endpoint.
-- Chat endpoint with conversation IDs.
-- SQLite persistence for conversation history.
+- FastAPI backend with root and health endpoints.
+- Chat endpoint at `POST /api/chat`.
+- SQLite storage for user and assistant messages.
+- Conversation IDs so a client can continue an existing conversation.
 - Optional OpenAI-compatible chat-completions provider.
-- Safe configuration through environment variables.
-- No credentials committed to this repository.
+- Environment-based configuration aligned with `.env.example`.
+- No real credentials committed to this repository.
 
-**Important:** Without an LLM provider key, the API stores messages but returns a clear configuration message instead of pretending to be an intelligent model. This initial backend is for development and must not be exposed publicly until authentication, HTTPS, rate limits, and deployment secrets are configured.
+**Important:** Without `LLM_API_KEY` and `LLM_MODEL`, the API saves messages and returns a clear configuration message instead of pretending an AI model is connected. This is a development foundation, not yet the complete multi-agent assistant. Do not expose it publicly until authentication, HTTPS, rate limits, and deployment secrets are configured.
 
 ## Requirements
 
@@ -27,20 +28,21 @@ Eleven is a private, self-hosted personal AI assistant. The first milestone is a
    pip install -r requirements.txt
    ```
 
-3. Copy `.env.example` to `.env` and configure a provider key if you have one.
-4. Start the API:
+3. Copy `.env.example` to `.env`.
+4. To enable model replies, set `LLM_API_KEY`, `LLM_MODEL`, and (if needed) `LLM_BASE_URL` in your private `.env` file. Never commit real keys.
+5. Start the API:
 
    ```bash
    uvicorn app.main:app --reload
    ```
 
-5. Open:
+6. Open:
    - Health: http://127.0.0.1:8000/health
    - API docs: http://127.0.0.1:8000/docs
 
 ## Chat API
 
-`POST /api/chat`
+Send a request to `POST /api/chat`:
 
 ```json
 {
@@ -49,17 +51,17 @@ Eleven is a private, self-hosted personal AI assistant. The first milestone is a
 }
 ```
 
-The response includes the conversation ID, assistant reply, and whether an LLM provider was used.
+The response includes a conversation ID, assistant reply, and status. Send the returned `conversation_id` with the next message to continue that conversation.
 
 ## Environment
 
-See `.env.example`. Never commit `.env`, API keys, SSH keys, or production database files.
+See `.env.example`. Never commit `.env`, API keys, SSH keys, production database files, or personal data.
 
 ## Planned milestones
 
 1. Secure foundation and verified VPS deployment.
 2. Main brain and agent registry.
-3. Persistent user memory with explicit user controls.
+3. User-controlled persistent memory and preferences.
 4. GitHub and Google Drive integrations with least-privilege permissions.
 5. Voice pipeline and optional face-based convenience features.
 6. Responsive iPhone-friendly web app/PWA.
