@@ -10,13 +10,26 @@
   - **Mike** — Google Drive files, folders and documents (requires Drive connection and permissions).
   - **Dustin** — day-to-day general research, comparisons, fact-checking and learning.
   - **Lucas** — head of the Coding Department.
-    - **Frontend Agent** — React, Next.js, HTML, CSS and UI/UX.
-    - **Mobile Agent** — Flutter, Dart, Android and iOS.
+    - **Frontend Agent** — full-spectrum frontend engineering: HTML5, CSS3, JavaScript, TypeScript, Bootstrap, Tailwind CSS, Sass/SCSS, Less, React, Next.js, Angular, Vue, Nuxt, Svelte, SvelteKit, Astro, jQuery, state management, UI component libraries, responsive/mobile-first design, Figma-to-code, accessibility, API integration, frontend tooling, performance, SEO and frontend testing.
+    - **Mobile Agent** — Flutter, Dart, Android, iOS and mobile UX.
     - **Backend Agent** — APIs, Python, Java, authentication and integrations.
     - **Database Agent** — SQL, PostgreSQL, schema design and query optimization.
     - **Testing Agent** — unit/integration testing, debugging and quality assurance.
 
 Lucas's five coding specialists are peers at the same level. Lucas coordinates their work and reports to Eleven.
+
+## Frontend Agent capability scope
+
+The Frontend Agent's declared capabilities cover:
+- Core: HTML5, CSS3, JavaScript/ES6+, TypeScript.
+- Styling: Bootstrap, Tailwind CSS, Sass/SCSS, Less.
+- Frameworks: React, Next.js, Angular, Vue, Nuxt, Svelte, SvelteKit, Astro, jQuery.
+- State and data: Redux/Redux Toolkit, Zustand, Context API, TanStack Query, REST, GraphQL and WebSocket.
+- UI systems: Material UI, Ant Design, Chakra UI and shadcn/ui.
+- UX and quality: responsive/mobile-first design, Figma-to-code, WCAG accessibility, cross-browser support, animation, SEO and Core Web Vitals.
+- Tooling and testing: Vite, Webpack, npm/yarn/pnpm, Git/GitHub, ESLint, Prettier, Jest, Vitest, React Testing Library, Cypress and Playwright.
+
+These are skill areas the agent is expected to understand and use when appropriate. A project should use only the technologies that fit its requirements; listing a capability does not mean every tool is installed, connected, or independently executable.
 
 ## Current implementation
 
@@ -25,6 +38,7 @@ Lucas's five coding specialists are peers at the same level. Lucas coordinates t
 - Configurable OpenAI-compatible model provider.
 - Agent hierarchy registry at `GET /api/agents`.
 - Top-level department routing for Max, Will, Mike, Dustin, Lucas, or Eleven.
+- Expanded Frontend Agent capability registry and routing for common frontend technologies.
 - Authenticated Lucas delegation planner at `POST /api/lucas/delegate`; selects relevant coding specialists and always includes Testing.
 - Role-specific system instructions for each top-level department.
 - User-approved memory endpoints.
