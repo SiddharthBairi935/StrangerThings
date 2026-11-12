@@ -1,18 +1,34 @@
-# Eleven — Personal AI Assistant
+# StrangerThings — Eleven Personal AI Assistant
 
-Eleven is a private, self-hosted personal AI assistant. The first milestone is a reliable API with persistent conversation history and a provider-neutral LLM connection. The architecture can grow into a multi-agent system, integrations, voice, and a mobile-friendly interface.
+**StrangerThings** is the project repository. **Eleven** is the personal AI assistant being built inside it.
 
-## Implemented in the current foundation
+Eleven is designed around a central brain/orchestrator, specialist agents, user-approved memory, and a private self-hosted backend. This repository is under active development; it is not yet a production-ready assistant.
 
-- FastAPI backend with root and health endpoints.
-- Chat endpoint at `POST /api/chat`.
-- SQLite storage for user and assistant messages.
-- Conversation IDs so a client can continue an existing conversation.
-- Optional OpenAI-compatible chat-completions provider.
-- Environment-based configuration aligned with `.env.example`.
-- No real credentials committed to this repository.
+## Current brain foundation
 
-**Important:** Without `LLM_API_KEY` and `LLM_MODEL`, the API saves messages and returns a clear configuration message instead of pretending an AI model is connected. This is a development foundation, not yet the complete multi-agent assistant. Do not expose it publicly until authentication, HTTPS, rate limits, and deployment secrets are configured.
+- FastAPI backend with health endpoint.
+- Chat API with conversation IDs and SQLite conversation history.
+- Configurable OpenAI-compatible chat-completions provider.
+- Central brain prompt with relevant user-approved memories.
+- Basic routing between general, coding, and research model roles.
+- Agent registry endpoint: `GET /api/agents`.
+- Memory endpoints: `GET/POST /api/memory` and `DELETE /api/memory/{memory_id}`.
+- Tests for memory isolation, conversation ordering, prompt context, and basic routing.
+
+## Agent status
+
+| Agent | Status | Notes |
+|---|---|---|
+| General | Active | Uses configured LLM |
+| Coding | Active | Prompt-specialized LLM role; no shell or repository write tools yet |
+| Research | Active | Prompt-specialized LLM role; no live web search tool yet |
+| GitHub | Planned | Needs scoped GitHub integration and approval checks |
+| Google Drive | Planned | Needs OAuth and Drive API integration |
+| Voice | Planned | Speech-to-text and text-to-speech pipeline |
+| Vision | Planned | Image understanding; face recognition requires extra privacy safeguards |
+| Tasks | Planned | Background worker and scheduler not connected |
+
+"Active" means the role can be selected and handled by the configured language model. It does not mean external tools are connected.
 
 ## Requirements
 
@@ -21,55 +37,62 @@ Eleven is a private, self-hosted personal AI assistant. The first milestone is a
 
 ## Run locally
 
-1. Create and activate a virtual environment.
-2. Install dependencies:
+```bash
+python -m venv .venv
+# Activate the virtual environment for your operating system
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+Set `LLM_API_KEY`, `LLM_MODEL`, and if required `LLM_BASE_URL` in your private `.env` file. Never commit real credentials.
 
-3. Copy `.env.example` to `.env`.
-4. To enable model replies, set `LLM_API_KEY`, `LLM_MODEL`, and (if needed) `LLM_BASE_URL` in your private `.env` file. Never commit real keys.
-5. Start the API:
+- Health: `http://127.0.0.1:8000/health`
+- API documentation: `http://127.0.0.1:8000/docs`
+- Agent registry: `GET /api/agents`
 
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+## Chat
 
-6. Open:
-   - Health: http://127.0.0.1:8000/health
-   - API docs: http://127.0.0.1:8000/docs
-
-## Chat API
-
-Send a request to `POST /api/chat`:
+`POST /api/chat`
 
 ```json
 {
-  "message": "Hello, Eleven",
-  "conversation_id": null
+  "message": "Help me plan the next development milestone",
+  "conversation_id": null,
+  "profile_id": "default"
 }
 ```
 
-The response includes a conversation ID, assistant reply, and status. Send the returned `conversation_id` with the next message to continue that conversation.
+Reuse the returned `conversation_id` to continue the same conversation. Use a stable profile ID for memory across conversations.
 
-## Environment
+## Memory
 
-See `.env.example`. Never commit `.env`, API keys, SSH keys, production database files, or personal data.
+`POST /api/memory`
 
-## Planned milestones
+```json
+{
+  "profile_id": "default",
+  "content": "The user prefers concise answers in Hindi."
+}
+```
 
-1. Secure foundation and verified VPS deployment.
-2. Main brain and agent registry.
-3. User-controlled persistent memory and preferences.
-4. GitHub and Google Drive integrations with least-privilege permissions.
-5. Voice pipeline and optional face-based convenience features.
-6. Responsive iPhone-friendly web app/PWA.
-7. Authentication, audit logs, backups, monitoring, and production hardening.
+Memory is explicitly saved through the memory endpoint. Do not store sensitive information. List with `GET /api/memory?profile_id=default`; delete an entry with `DELETE /api/memory/{memory_id}?profile_id=default`.
 
-## Security principles
+## Important security limitations before deployment
 
-- Secrets belong in environment variables or a secret manager, never source control.
-- Face recognition must never be the only authorization factor for sensitive actions.
-- External actions require explicit permissions and audit logging.
-- Personal memory must be inspectable and deletable by its owner.
+- The current API has no user authentication or authorization. Do not expose it publicly yet.
+- The default profile ID is a development convenience, not a secure identity boundary.
+- Configure HTTPS, authentication, per-user data isolation, rate limiting, CORS for the real frontend origin, backups, and secret management before public use.
+- Never commit `.env`, API keys, SSH keys, database files, or personal data.
+- Face recognition must never be the only factor authorizing sensitive actions.
+
+## Roadmap
+
+1. Complete and test brain foundation.
+2. Add secure user accounts and memory ownership.
+3. Connect GitHub and Google Drive agents with least-privilege scopes and approvals.
+4. Add live research tools and controlled coding execution.
+5. Add voice and vision services.
+6. Build a responsive iPhone-friendly web app/PWA.
+7. Add background jobs, monitoring, backups, and production hardening.
+8. Deploy to the Hostinger VPS only after security and integration tests pass.
