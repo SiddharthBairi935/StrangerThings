@@ -13,6 +13,8 @@ class AgentHierarchyTests(unittest.TestCase):
             "Find a PDF in Google Drive": "mike",
             "Research the best cloud certifications": "dustin",
             "Fix this Flutter bug": "lucas",
+            "Build a Vue.js frontend": "lucas",
+            "Create a responsive Bootstrap page": "lucas",
             "Hello Eleven": "eleven",
         }
         for message, expected in cases.items():
@@ -27,6 +29,20 @@ class AgentHierarchyTests(unittest.TestCase):
             {name for name, item in agents.items() if item["parent"] == "lucas"},
             specialist_names,
         )
+
+    def test_frontend_agent_has_broad_frontend_capabilities(self):
+        agents = {item["name"]: item for item in list_agents()}
+        frontend = agents["frontend"]
+        self.assertEqual(frontend["parent"], "lucas")
+        capabilities = set(frontend["capabilities"])
+        expected = {
+            "html5", "css3", "javascript", "typescript", "bootstrap", "tailwind_css",
+            "react", "nextjs", "angular", "vue", "svelte", "nuxt",
+            "responsive_design", "accessibility", "figma_to_code",
+            "redux_toolkit", "material_ui", "graphql", "playwright",
+            "performance_optimization",
+        }
+        self.assertTrue(expected.issubset(capabilities))
 
     def test_all_five_personal_agents_are_present(self):
         agents = {item["name"]: item for item in list_agents()}
