@@ -25,11 +25,12 @@ Lucas's five coding specialists are peers at the same level. Lucas coordinates t
 - Configurable OpenAI-compatible model provider.
 - Agent hierarchy registry at `GET /api/agents`.
 - Top-level department routing for Max, Will, Mike, Dustin, Lucas, or Eleven.
+- Authenticated Lucas delegation planner at `POST /api/lucas/delegate`; selects relevant coding specialists and always includes Testing.
 - Role-specific system instructions for each top-level department.
 - User-approved memory endpoints.
 - GitHub Actions test workflow.
 
-**Important:** The hierarchy and role-aware routing are implemented. This is not yet a fully autonomous multi-agent system: the five coding specialists are currently defined as roles under Lucas, but independent agent execution, code tools, Drive/LinkedIn connections, live research tools, voice, vision, approvals UI, and scheduled tasks still need implementation. A role marked active means its routing/instructions exist; it does not mean external integrations are connected.
+**Important:** The hierarchy and role-aware routing are implemented. This is not yet a fully autonomous multi-agent system: Lucas currently creates a deterministic delegation plan; specialist agents do not independently execute code or call tools yet. Repository editing, command execution, Drive/LinkedIn connections, live research tools, voice, vision, approvals UI, and scheduled tasks still need implementation. A role marked active means its routing/instructions exist; it does not mean external integrations are connected.
 
 ## Local setup
 
@@ -59,3 +60,7 @@ Never commit `.env`, provider keys, or access tokens. The browser keeps the owne
 The API is not production-ready. Do not expose it publicly until HTTPS/reverse proxy, rate limiting, backups, monitoring, secret management, and end-to-end security checks are complete. Consequential external actions must require explicit user approval. Fitness guidance must not be presented as medical diagnosis.
 
 Hostinger deployment has not been performed by this repository workflow. Deploy only after integration, security, and operational checks are complete.
+
+## Lucas delegation API
+
+The authenticated `POST /api/lucas/delegate` endpoint accepts a task such as `{"task":"Fix the Flutter dashboard"}` and returns the selected specialist workflow. It always includes Testing as the final verification role. The response explicitly reports `status: planned` and `execution_started: false`; it plans work but does not execute code.
