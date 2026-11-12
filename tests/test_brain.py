@@ -15,6 +15,9 @@ class AgentHierarchyTests(unittest.TestCase):
             "Fix this Flutter bug": "lucas",
             "Build a Vue.js frontend": "lucas",
             "Create a responsive Bootstrap page": "lucas",
+            "Build an Android app in Kotlin": "lucas",
+            "Create a PHP Laravel API": "lucas",
+            "Optimize a MongoDB database": "lucas",
             "Hello Eleven": "eleven",
         }
         for message, expected in cases.items():
@@ -43,6 +46,35 @@ class AgentHierarchyTests(unittest.TestCase):
             "performance_optimization",
         }
         self.assertTrue(expected.issubset(capabilities))
+
+    def test_mobile_backend_database_testing_have_broad_domain_skills(self):
+        agents = {item["name"]: item for item in list_agents()}
+        expected = {
+            "mobile": {
+                "flutter", "react_native", "kotlin", "swift", "swiftui",
+                "dotnet_maui", "ionic", "appium", "play_store_release",
+            },
+            "backend": {
+                "java", "spring_boot", "python", "django", "fastapi", "php",
+                "laravel", "aspnet", "c", "cpp", "nodejs", "golang",
+                "microservices", "oauth2", "docker",
+            },
+            "database": {
+                "sql", "postgresql", "mysql", "sql_server", "oracle_database",
+                "sqlite", "mongodb", "redis", "cassandra", "dynamodb",
+                "firebase", "schema_design", "replication", "backup",
+            },
+            "testing": {
+                "manual_testing", "unit_testing", "integration_testing",
+                "end_to_end_testing", "api_testing", "performance_testing",
+                "security_testing", "selenium", "playwright", "cypress",
+                "appium", "pytest", "junit", "jmeter",
+            },
+        }
+        for agent_name, required in expected.items():
+            with self.subTest(agent=agent_name):
+                self.assertEqual(agents[agent_name]["parent"], "lucas")
+                self.assertTrue(required.issubset(set(agents[agent_name]["capabilities"])))
 
     def test_all_five_personal_agents_are_present(self):
         agents = {item["name"]: item for item in list_agents()}
