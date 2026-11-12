@@ -1,7 +1,11 @@
 import unittest
 
 from app.agents import list_agents, route_agent
-from app.brain import build_system_prompt
+from app.brain import (
+    build_lucas_synthesis_prompt,
+    build_specialist_prompt,
+    build_system_prompt,
+)
 from app.delegation import create_lucas_plan
 
 
@@ -106,6 +110,21 @@ class AgentHierarchyTests(unittest.TestCase):
     def test_generic_task_still_includes_testing(self):
         plan = create_lucas_plan("Review this software project")
         self.assertEqual(plan["specialists"], ["backend", "testing"])
+
+    def test_specialist_prompts_are_domain_specific(self):
+        self.assertIn("Flutter/Dart", build_specialist_prompt("mobile", "Build an app"))
+        self.assertIn("PostgreSQL", build_specialist_prompt("database", "Tune queries"))
+        self.assertIn("security", build_specialist_prompt("testing", "Review API"))
+
+    def test_lucas_synthesis_enforces_execution_boundary(self):
+        prompt = build_lucas_synthesis_prompt(
+            "Build a React page",
+            {"frontend": "Suggested component code."},
+            "Proposed tests: responsive layout and keyboard navigation.",
+        )
+        self.assertIn("You have not executed shell commands", prompt)
+        self.assertIn("Testing Agent review", prompt)
+        self.assertIn("Suggested component code.", prompt)
 
 
 if __name__ == "__main__":
