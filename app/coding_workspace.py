@@ -182,6 +182,9 @@ def _allowed_path(path: str) -> bool:
         or any(part in {"", ".", ".."} for part in path.split("/"))
     ):
         return False
+    parts = path.split("/")
+    if any(not re.fullmatch(r"[A-Za-z0-9_.@+-]+", part) for part in parts):
+        return False
     pure = PurePosixPath(path)
     if path in ALLOWED_ROOT_FILES:
         return True
