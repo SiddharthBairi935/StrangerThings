@@ -292,7 +292,7 @@ async def _chat_completion(client: httpx.AsyncClient, settings: Any,
 def _qa_requires_changes(review: str) -> bool:
     # Only an explicit PASS is approval. Empty, malformed, FAIL, and
     # NEEDS_CHANGES responses all fail closed and trigger repair/rejection.
-    return re.match(r"^PASS(?:\\b|$)", review.lstrip().upper()) is None
+    return re.match(r"^PASS(?:\b|$)", review.lstrip().upper()) is None
 
 
 def _repository_context(files: dict[str, str]) -> str:
