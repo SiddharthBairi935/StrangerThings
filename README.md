@@ -5,7 +5,7 @@
 ## Confirmed agent hierarchy
 
 - **Eleven (11) / L** — overall assistant, central brain, planning and coordination.
-  - **Max** — diet, fitness, workouts, physical activity, weight, measurements and progress.
+  - **Max** — personal health and fitness: daily food logs, nutrition estimates, meal planning, workouts, activity, weight trends, measurements, recovery and progress.
   - **Will** — LinkedIn, career, jobs, freelancing, networking and resume support.
   - **Mike** — Google Drive files, folders and documents (requires Drive connection and permissions).
   - **Dustin** — day-to-day general research, comparisons, fact-checking and learning.
@@ -30,6 +30,8 @@ Each specialist is expected to cover the broad, end-to-end skill set of its own 
 - Configurable OpenAI-compatible model provider.
 - Agent hierarchy registry at `GET /api/agents`.
 - Top-level department routing for Max, Will, Mike, Dustin, Lucas, or Eleven.
+- Max's authenticated health-log API stores owner-scoped food, workout, weight, measurement, activity and note entries; explicit completed/current facts in Max chat are extracted and saved when the configured model can validate them.
+- Max receives recent private health logs as context, uses cautious nutrition estimates and weekly weight trends, and follows non-diagnostic health-safety guidance.
 - Broad capability registries and role instructions for all six Lucas coding specialists.
 - Lucas delegation planner at `POST /api/lucas/delegate`, which selects specialists from task keywords and always includes Testing.
 - User-approved memory endpoints.
@@ -69,6 +71,12 @@ Never commit `.env`, provider keys, or access tokens. The browser keeps the owne
 The API is not production-ready. Do not expose it publicly until HTTPS/reverse proxy, rate limiting, backups, monitoring, secret management, and end-to-end security checks are complete. Consequential external actions must require explicit user approval. Fitness guidance must not be presented as medical diagnosis.
 
 Hostinger deployment has not been performed by this repository workflow. Deploy only after integration, security, and operational checks are complete.
+
+## Max health and fitness
+
+Max is Eleven's health and fitness specialist. The authenticated POST /api/max/logs endpoint accepts structured entries with entry_type (food, workout, weight, measurement, activity, or note), a non-empty data object, and an optional logged_at timestamp. GET /api/max/logs returns the owner's entries (optionally filtered by entry_type); DELETE /api/max/logs/{entry_id} deletes only an entry belonging to the authenticated owner.
+
+When a user chats with Max, the backend asks the configured model to extract only explicitly reported completed/current food, workout, weight, measurement, or activity facts as structured JSON. Valid entries are saved to the owner's health log and supplied to Max as recent context. If extraction fails or no explicit loggable fact exists, no entry is saved. Estimates are not treated as measurements. Health logs are private and owner-scoped; Max does not diagnose conditions, prescribe crash diets, or replace a clinician. The chat extraction is model-assisted and should be reviewed by the user; it is not a medical record or a guaranteed food-recognition system.
 
 ## Lucas delegation API
 
