@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.database import get_health_entries, get_history, init_db, save_health_entry, save_message
+from app.database import delete_health_entry, get_health_entries, get_history, init_db, save_health_entry, save_message
 
 
 class DatabaseTests(unittest.TestCase):
@@ -58,6 +58,16 @@ class DatabaseTests(unittest.TestCase):
             )
             with self.assertRaises(ValueError):
                 save_health_entry(database_path, "owner", "diagnosis", {"value": "x"})
+
+    def test_health_log_delete_is_owner_scoped(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            database_path = Path(directory) / "eleven.db"
+            init_db(database_path)
+            entry_id = save_health_entry(database_path, "owner-a", "food", {"item": "banana"})
+            self.assertFalse(delete_health_entry(database_path, "owner-b", entry_id))
+            self.assertEqual(len(get_health_entries(database_path, "owner-a")), 1)
+            self.assertTrue(delete_health_entry(database_path, "owner-a", entry_id))
+            self.assertEqual(get_health_entries(database_path, "owner-a"), [])
 
     def test_conversations_are_isolated(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
