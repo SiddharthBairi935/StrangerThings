@@ -150,10 +150,6 @@ jobs:
             swift test --package-path "$(dirname "$manifest")"
           done < <(find . -name Package.swift -not -path '*/.build/*' -not -path '*/.git/*' -print0)
 
-      - name: Set up CMake
-        if: ${{ hashFiles('**/CMakeLists.txt') != '' }}
-        uses: lukka/get-cmake@latest
-
       - name: Run C and C++ tests
         if: ${{ hashFiles('**/CMakeLists.txt') != '' }}
         shell: bash
@@ -181,7 +177,7 @@ jobs:
           while IFS= read -r -d '' manifest; do
             project_dir="$(dirname "$manifest")"
             cd "$GITHUB_WORKSPACE/$project_dir"
-            composer install --no-interaction --prefer-dist --no-progress
+            composer install --no-interaction --prefer-dist --no-progress --no-scripts --no-plugins
             php -r '$p=json_decode(file_get_contents("composer.json"), true); if (empty($p["scripts"]["test"])) { fwrite(STDERR, "Missing composer scripts.test\n"); exit(1); }'
             composer run-script test
           done < <(find . -name composer.json -not -path '*/vendor/*' -not -path '*/.git/*' -print0)
