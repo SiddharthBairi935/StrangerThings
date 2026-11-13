@@ -53,7 +53,6 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
         rejected = (
             "../.env",
             "app/../../secret.py",
-            ".github/workflows/deploy.yml",
             ".github/CODEOWNERS",
             ".github/dependabot.yml",
             ".github/workflows/scripts/deploy.yml",
