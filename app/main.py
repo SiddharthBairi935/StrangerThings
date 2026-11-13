@@ -5,7 +5,7 @@ from typing import Literal
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -27,6 +27,7 @@ from app.database import (
 )
 from app.delegation import create_lucas_plan
 from app.health import summarize_health_entries
+from app.mike_drive import read_drive_file, search_drive_files
 
 settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -161,6 +162,39 @@ async def max_delete_health_log(
     if not deleted:
         raise HTTPException(status_code=404, detail="Health log not found.")
     return {"deleted": True}
+
+
+@app.get("/api/mike/drive/status")
+async def mike_drive_status(_: str = Depends(require_owner)) -> dict[str, object]:
+    return {
+        "connected": bool(settings.google_drive_access_token),
+        "mode": "read_only",
+        "required_scope": "https://www.googleapis.com/auth/drive.readonly",
+    }
+
+
+@app.get("/api/mike/drive/search")
+async def mike_drive_search(
+    q: str = Query(min_length=1, max_length=300),
+    limit: int = 20,
+    _: str = Depends(require_owner),
+) -> dict[str, object]:
+    if not settings.google_drive_access_token:
+        raise HTTPException(
+            status_code=503,
+            detail="Mike's Google Drive connection is not configured. Set GOOGLE_DRIVE_ACCESS_TOKEN server-side with the drive.readonly scope.",
+        )
+    return await search_drive_files(settings.google_drive_access_token, q, limit)
+
+
+@app.get("/api/mike/drive/files/{file_id}")
+async def mike_drive_read(
+    file_id: str,
+    _: str = Depends(require_owner),
+) -> dict[str, object]:
+    if not settings.google_drive_access_token:
+        raise HTTPException(status_code=503, detail="Mike's Google Drive connection is not configured.")
+    return await read_drive_file(settings.google_drive_access_token, file_id)
 
 
 @app.post("/api/lucas/delegate")

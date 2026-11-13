@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     llm_model: str | None = Field(default=None, validation_alias="LLM_MODEL")
     llm_timeout_seconds: float = Field(default=45.0, validation_alias="LLM_TIMEOUT_SECONDS", gt=0, le=180)
 
+    google_drive_access_token: str | None = Field(default=None, validation_alias="GOOGLE_DRIVE_ACCESS_TOKEN")
+
     tavily_api_key: str | None = Field(default=None, validation_alias="TAVILY_API_KEY")
     research_max_results: int = Field(default=8, validation_alias="RESEARCH_MAX_RESULTS", ge=3, le=12)
 

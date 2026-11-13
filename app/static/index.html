@@ -25,8 +25,9 @@ button,input,textarea{font:inherit}button{cursor:pointer}.shell{display:grid;gri
 <div class="agent"><span class="dot"></span> Max · Health & fitness</div>
 <div class="agent"><span class="dot"></span> Coding</div>
 <div class="agent"><span class="dot"></span> Dustin · Research</div>
+<div class="agent"><span class="dot"></span> Will · Career</div>
+<div class="agent"><span class="dot"></span> Mike · Drive (read-only)</div>
 <div class="agent planned"><span class="dot"></span> GitHub tools · planned</div>
-<div class="agent planned"><span class="dot"></span> Drive tools · planned</div>
 <div class="agent planned"><span class="dot"></span> Voice & vision · planned</div>
 </div>
 <div class="sidefoot"><div class="section">Connection</div><div class="muted" id="connectionLabel">Not connected</div><p class="notice">Your access token stays in this browser tab only. Never paste it into a public or shared device.</p></div>
@@ -34,7 +35,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}.shell{display:grid;gri
 <main class="main">
 <header class="top"><h1>Eleven <span class="muted">/ Workspace</span></h1><div class="top-actions"><button class="dashboard-toggle" id="maxToggle">Max Dashboard</button><div class="status"><span class="dot"></span><span id="statusText">Ready to connect</span></div></div></header>
 <section class="content">
-<div class="welcome" id="welcome"><div class="orb">L</div><h2>What can I help you with?</h2><p>One assistant. Specialist agents. Your work, in one place.</p><div class="taskbar"><span class="chip">Chat</span><span class="chip">Max · Nutrition & fitness</span><span class="chip">Dustin · Research & sources</span><span class="chip">Coding</span><span class="chip">Memory</span></div></div>
+<div class="welcome" id="welcome"><div class="orb">L</div><h2>What can I help you with?</h2><p>One assistant. Specialist agents. Your work, in one place.</p><div class="taskbar"><span class="chip">Chat</span><span class="chip">Max · Nutrition & fitness</span><span class="chip">Dustin · Research & sources</span><span class="chip">Will · Career & jobs</span><span class="chip">Mike · Drive files</span><span class="chip">Coding · Lucas</span><span class="chip">Memory</span></div></div>
 <section class="max-panel" id="maxPanel" hidden>
 <div class="max-head"><div><h2>Max · Health & Fitness</h2><div class="muted" style="font-size:12px">Your logged nutrition, workouts and body progress</div></div>
 <div class="max-tools"><select id="maxDays" aria-label="Progress period"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select><button id="maxRefresh">Refresh</button></div></div>
@@ -49,7 +50,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}.shell{display:grid;gri
 </section>
 <div class="messages" id="messages" aria-live="polite"></div>
 <div class="composer">
-<div class="composebox"><textarea id="message" placeholder="Message Eleven or Max… (Enter to send, Shift+Enter for a new line)"></textarea><div class="actions"><span class="hint" id="agentHint">General assistant will route your request</span><button class="send" id="send">Send ↑</button></div></div>
+<div class="composebox"><textarea id="message" placeholder="Message Eleven or a specialist… (Enter to send, Shift+Enter for a new line)"></textarea><div class="actions"><span class="hint" id="agentHint">General assistant will route your request</span><button class="send" id="send">Send ↑</button></div></div>
 <div class="connect"><input id="token" type="password" autocomplete="off" placeholder="Paste your ELEVEN_API_TOKEN to connect"><button id="connect">Connect</button><button class="secondary" id="disconnect">Disconnect</button></div>
 <div class="notice" id="notice">Enter the owner token configured on your server. The token is kept in memory for this tab and is not saved to local storage.</div>
 </div>
