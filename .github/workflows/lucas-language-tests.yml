@@ -1,0 +1,161 @@
+name: Lucas language checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  language-tests:
+    name: Optional language-specific test suites
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        if: ${{ hashFiles('**/package.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run JavaScript and TypeScript tests
+        if: ${{ hashFiles('**/package.json') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            project_dir="$(dirname "$manifest")"
+            cd "$GITHUB_WORKSPACE/$project_dir"
+            if [ -f package-lock.json ]; then
+              npm ci --ignore-scripts --no-audit --no-fund
+            else
+              npm install --ignore-scripts --no-audit --no-fund
+            fi
+            node -e "const p=require('./package.json'); if (!p.scripts || !p.scripts.test) { console.error('Missing package.json scripts.test in ' + process.cwd()); process.exit(1); }"
+            CI=true npm test
+          done < <(find . -name package.json -not -path '*/node_modules/*' -not -path '*/.git/*' -print0)
+
+      - name: Set up Flutter
+        if: ${{ hashFiles('**/pubspec.yaml') != '' }}
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Run Flutter tests
+        if: ${{ hashFiles('**/pubspec.yaml') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            project_dir="$(dirname "$manifest")"
+            cd "$GITHUB_WORKSPACE/$project_dir"
+            flutter pub get
+            test -d test || { echo "Missing Flutter test/ directory in $project_dir"; exit 1; }
+            flutter test
+          done < <(find . -name pubspec.yaml -not -path '*/.dart_tool/*' -not -path '*/.git/*' -print0)
+
+      - name: Set up Go
+        if: ${{ hashFiles('**/go.mod') != '' }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Run Go tests
+        if: ${{ hashFiles('**/go.mod') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            project_dir="$(dirname "$manifest")"
+            cd "$GITHUB_WORKSPACE/$project_dir"
+            go test ./...
+          done < <(find . -name go.mod -not -path '*/vendor/*' -not -path '*/.git/*' -print0)
+
+      - name: Set up Rust
+        if: ${{ hashFiles('**/Cargo.toml') != '' }}
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run Rust tests
+        if: ${{ hashFiles('**/Cargo.toml') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            cargo test --manifest-path "$manifest" --all-targets
+          done < <(find . -name Cargo.toml -not -path '*/target/*' -not -path '*/.git/*' -print0)
+
+      - name: Set up Java
+        if: ${{ hashFiles('**/pom.xml') != '' }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run Maven tests
+        if: ${{ hashFiles('**/pom.xml') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            mvn --batch-mode --no-transfer-progress -f "$manifest" test
+          done < <(find . -name pom.xml -not -path '*/target/*' -not -path '*/.git/*' -print0)
+
+      - name: Set up .NET
+        if: ${{ hashFiles('**/*.sln') != '' || hashFiles('**/*.csproj') != '' }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Run .NET tests
+        if: ${{ hashFiles('**/*.sln') != '' || hashFiles('**/*.csproj') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' projects < <(find . \( -name '*.sln' -o -name '*.csproj' \) -not -path '*/bin/*' -not -path '*/obj/*' -not -path '*/.git/*' -print0)
+          test "${#projects[@]}" -gt 0
+          for project in "${projects[@]}"; do dotnet test "$project" --verbosity minimal; done
+
+      - name: Set up PHP
+        if: ${{ hashFiles('**/composer.json') != '' }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+
+      - name: Run PHP tests
+        if: ${{ hashFiles('**/composer.json') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            project_dir="$(dirname "$manifest")"
+            cd "$GITHUB_WORKSPACE/$project_dir"
+            composer install --no-interaction --prefer-dist --no-progress
+            php -r '$p=json_decode(file_get_contents("composer.json"), true); if (empty($p["scripts"]["test"])) { fwrite(STDERR, "Missing composer scripts.test\n"); exit(1); }'
+            composer run-script test
+          done < <(find . -name composer.json -not -path '*/vendor/*' -not -path '*/.git/*' -print0)
+
+      - name: Set up Ruby
+        if: ${{ hashFiles('**/Gemfile') != '' }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: false
+
+      - name: Run Ruby tests
+        if: ${{ hashFiles('**/Gemfile') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            project_dir="$(dirname "$manifest")"
+            cd "$GITHUB_WORKSPACE/$project_dir"
+            bundle install
+            if [ -f Rakefile ]; then bundle exec rake test; else bundle exec rspec; fi
+          done < <(find . -name Gemfile -not -path '*/vendor/*' -not -path '*/.git/*' -print0)
