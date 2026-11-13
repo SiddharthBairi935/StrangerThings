@@ -34,7 +34,7 @@ Each specialist is expected to cover the broad, end-to-end skill set of its own 
 - User-approved memory endpoints.
 - GitHub Actions test workflow.
 
-**Important:** Lucas now performs multi-specialist LLM orchestration: relevant domain specialists produce proposals, Testing reviews them, and Lucas synthesizes a final response. These are role-separated calls to the configured model, not separate independently hosted models. This is not yet an autonomous software execution environment: the agents cannot run shell commands, edit repository files from the running app, execute tests, or deploy. GitHub write access, command execution, Drive/LinkedIn connections, live research tools, voice, vision, approvals UI and scheduled tasks still need implementation. A registered capability describes knowledge scope; it does not mean a runtime, external account, or tool is connected.
+**Important:** Lucas uses role-separated calls to the configured model for his five peer specialists; they are not separate independently hosted models. The GitHub coding workspace now coordinates relevant domain specialists, obtains an independent Testing review, integrates a structured multi-language patch, validates paths and secret-like content, and opens a dedicated draft pull request. The application never executes generated code or arbitrary shell commands. CI results must be checked on GitHub before a pull request is merged. A registered capability describes knowledge scope; it does not mean a runtime, external account, device, or tool is installed or connected.
 
 ## Local setup
 
@@ -68,4 +68,21 @@ Hostinger deployment has not been performed by this repository workflow. Deploy 
 ## Lucas delegation API
 
 The authenticated `POST /api/lucas/delegate` endpoint accepts a task such as `{"task":"Fix the Flutter dashboard"}` and returns the selected specialist workflow. It always includes Testing as the final verification role. The response explicitly reports `status: planned` and `execution_started: false`; it plans work but does not execute code.
-\n\n## Lucas coding workspace\n\nThe authenticated `POST /api/lucas/code` endpoint accepts `{"task":"Add a profile settings screen"}`. When `GITHUB_TOKEN`, `GITHUB_REPOSITORY`, and LLM credentials are configured, Lucas reads a bounded set of `app/`, `tests/`, and root documentation/dependency files and generates a focused patch. The server validates every path, limits patch size and changed-file count, requires a test-file change, creates a dedicated `lucas/task-*` branch, commits the patch, and opens a draft pull request. The default branch is not modified. GitHub Actions runs the configured test workflow for the PR. The app itself does not execute shell commands or claim that CI passed; review the PR checks before merging. Never grant this token more permissions than required, and do not expose it to the browser.\n
+\n\n## Lucas multi-stack coding workspace
+
+The authenticated `POST /api/lucas/code` endpoint accepts `{"task":"Build a React page with tests"}`. When GitHub and LLM credentials are configured, Lucas:
+
+1. Reads a bounded set of eligible repository source files and manifests.
+2. Selects the relevant Frontend, Mobile, Backend, and/or Database specialists using the delegation planner.
+3. Collects domain-specific implementation plans in parallel.
+4. Asks the Testing specialist for an independent test strategy.
+5. Integrates the plans into a structured patch and requests a separate QA review.
+6. Performs one model-driven repair pass when QA reports `NEEDS_CHANGES`; if blockers remain after that pass, it refuses to publish a pull request.
+7. Validates changed paths, test-file presence, file sizes, duplicate paths, and secret-like values.
+8. Creates a dedicated `lucas/task-*` branch and opens a draft pull request.
+
+The workspace accepts common source formats for Python, JavaScript/TypeScript, HTML/CSS, Dart, Java/Kotlin, Swift, C#, PHP, Go, Rust, Ruby, SQL, and common project manifests. Eligible project roots are `app/`, `tests/`, `frontend/`, `mobile/`, `backend/`, `database/`, `shared/`, and `docs/`. This is a file-format and patch-generation capability; it does not mean every compiler, SDK, package manager, device, database, or test runner is installed.
+
+The running application does **not** execute generated code or shell commands. GitHub Actions runs the Python unittest suite, endpoint/workflow integration tests, Ruff, and executable smoke projects for TypeScript/Node.js, Flutter/Dart, Java/Maven, Kotlin/Gradle, C#, Go, Rust, Swift, C, C++, PHP, Ruby, and PostgreSQL SQL migrations/assertions. The smoke projects are intentionally small validation fixtures, not production application templates. A language job is skipped when its manifest is absent; review the actual CI jobs for each pull request. Review CI results, inspect the diff, and approve the pull request before merging. The default branch is never modified by the coding endpoint.
+
+Keep `GITHUB_TOKEN` server-side only, grant the minimum repository permissions required, and never expose it to the browser. Before model calls, the workspace rejects credential-like task text and omits repository files that match its credential detectors; generated patches are also checked for private-key, GitHub-token, provider-key, and hardcoded password patterns. These are defense-in-depth guardrails, not a substitute for repository secret scanning.

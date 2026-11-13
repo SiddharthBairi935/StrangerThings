@@ -1,0 +1,8 @@
+{
+  "name": "strangerthings/lucas-php-smoke",
+  "description": "Minimal PHP validation project for Lucas CI",
+  "type": "project",
+  "scripts": {
+    "test": "php tests/run.php"
+  }
+}

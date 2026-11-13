@@ -22,13 +22,39 @@ def create_lucas_plan(task: str) -> dict[str, object]:
     selected: list[str] = []
 
     keyword_groups = {
-        "frontend": ("react", "next.js", "nextjs", "html", "css", "web page", "website ui", "web ui", "frontend", "angular", "vue", "bootstrap", "tailwind"),
-        "mobile": ("flutter", "dart", "android", "ios", "mobile", "app screen", "react native", "swift", "kotlin", "ionic"),
-        "backend": ("api", "backend", "server", "python", "java", "authentication", "endpoint", "fastapi", "php", "laravel", "asp.net", ".net", "spring boot", "django", "node.js", "nestjs", "golang"),
-        "database": ("database", "postgres", "postgresql", "sql", "schema", "migration", "query", "sqlite", "mongodb", "redis", "oracle", "dynamodb", "mysql"),
+        "frontend": (
+            "react frontend", "react.js", "react component", "next.js", "nextjs",
+            "html", "css", "javascript", "typescript", "web page", "website ui",
+            "web ui", "frontend", "angular", "vue", "nuxt", "svelte", "astro",
+            "bootstrap", "tailwind", "sass", "scss", "vite", "webpack",
+            "accessibility", "responsive design",
+        ),
+        "mobile": (
+            "flutter", "dart", "android", "ios", "mobile", "app screen",
+            "react native", "swift", "swiftui", "kotlin", "jetpack compose",
+            "ionic", "capacitor", ".net maui", "xamarin", "kotlin multiplatform",
+        ),
+        "backend": (
+            "api", "backend", "server", "python", "java", "authentication",
+            "endpoint", "fastapi", "django", "flask", "php", "laravel",
+            "asp.net", ".net", "spring", "node.js", "nestjs", "express",
+            "golang", "rust", "ruby", "c++", "c#", "microservice", "grpc",
+        ),
+        "database": (
+            "database", "postgres", "postgresql", "sql", "schema", "migration",
+            "query", "sqlite", "mongodb", "redis", "oracle", "dynamodb",
+            "mysql", "cassandra", "firestore", "snowflake", "bigquery",
+            "elasticsearch", "neo4j", "database index",
+        ),
     }
     for agent, keywords in keyword_groups.items():
-        if any(keyword in normalized for keyword in keywords):
+        matched = any(keyword in normalized for keyword in keywords)
+        if agent == "frontend" and "react native" in normalized and "react frontend" not in normalized:
+            matched = any(
+                keyword in normalized for keyword in keyword_groups["frontend"]
+                if keyword not in {"react frontend", "react.js", "react component"}
+            )
+        if matched:
             selected.append(agent)
 
     # For a broad coding request with no stack clues, Lucas starts with backend

@@ -24,6 +24,10 @@ class AgentHierarchyTests(unittest.TestCase):
             "Optimize a MongoDB database": "lucas",
             "Write Playwright end-to-end tests": "lucas",
             "Build a C++ service": "lucas",
+            "Create a SvelteKit website": "lucas",
+            "Build a React Native app": "lucas",
+            "Create a SwiftUI iOS app": "lucas",
+            "Build a Rust microservice": "lucas",
             "Hello Eleven": "eleven",
         }
         for message, expected in cases.items():
@@ -112,6 +116,16 @@ class AgentHierarchyTests(unittest.TestCase):
     def test_generic_task_still_includes_testing(self):
         plan = create_lucas_plan("Review this software project")
         self.assertEqual(plan["specialists"], ["backend", "testing"])
+
+    def test_react_native_is_not_misrouted_to_frontend(self):
+        plan = create_lucas_plan("Build a React Native mobile app")
+        self.assertEqual(plan["specialists"], ["mobile", "testing"])
+
+    def test_sveltekit_and_rust_tasks_select_the_correct_specialist(self):
+        frontend = create_lucas_plan("Build a SvelteKit website")
+        backend = create_lucas_plan("Create a Rust backend service")
+        self.assertEqual(frontend["specialists"], ["frontend", "testing"])
+        self.assertEqual(backend["specialists"], ["backend", "testing"])
 
     def test_specialist_prompts_are_domain_specific(self):
         self.assertIn("Flutter/Dart", build_specialist_prompt("mobile", "Build an app"))
