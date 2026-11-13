@@ -13,6 +13,7 @@ SPECIALISTS = {
     "backend": "Own server-side delivery across Java, Python, PHP, .NET/C#, Node.js, Go, Ruby, C/C++, APIs, distributed systems, security, integrations, and deployment.",
     "database": "Own data architecture and operations across SQL, relational, NoSQL, cache, search, graph, time-series, and cloud data platforms, including modeling, reliability, security, and performance.",
     "testing": "Own quality engineering across manual and automated testing, web/mobile/API/database layers, unit through end-to-end tests, performance, security, accessibility, release validation, and reporting.",
+    "devops": "Own CI/CD, GitHub Actions, build and test pipelines, Docker and Compose, deployment architecture, environment configuration, Linux and reverse proxies, TLS, infrastructure as code, release and rollback plans, monitoring, logs, health checks, incident response, operational runbooks, dependency and workflow security. Prefer provider-independent designs. Require explicit approval before production deployment, destructive infrastructure changes, or modifying secrets.",
 }
 
 
@@ -39,6 +40,15 @@ def create_lucas_plan(task: str) -> dict[str, object]:
             "endpoint", "fastapi", "django", "flask", "php", "laravel",
             "asp.net", ".net", "spring", "node.js", "nestjs", "express",
             "golang", "rust", "ruby", "c++", "c#", "microservice", "grpc",
+        ),
+        "devops": (
+            "devops", "ci/cd", "ci cd", "pipeline", "github actions", "workflow",
+            "docker", "dockerfile", "docker compose", "container", "deploy",
+            "deployment", "release", "rollback", "production ready", "hosting",
+            "hostinger", "nginx", "reverse proxy", "ssl", "tls", "terraform",
+            "infrastructure as code", "kubernetes", "helm", "monitoring",
+            "observability", "logging", "health check", "uptime", "incident",
+            "secrets management", "supply chain security",
         ),
         "database": (
             "database", "postgres", "postgresql", "sql", "schema", "migration",
