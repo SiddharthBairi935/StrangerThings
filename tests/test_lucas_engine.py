@@ -3,12 +3,18 @@ from unittest.mock import AsyncMock, patch
 
 from app.coding_workspace import (
     _generate_integrated_patch,
+    _qa_requires_changes,
     _review_integrated_patch,
     _run_specialist_round,
 )
 
 
 class LucasSpecialistEngineTests(unittest.IsolatedAsyncioTestCase):
+    def test_qa_gate_detects_blockers_and_accepts_pass(self):
+        self.assertTrue(_qa_requires_changes("NEEDS_CHANGES\\nFix the unsafe query."))
+        self.assertTrue(_qa_requires_changes("  needs_changes: missing auth check"))
+        self.assertFalse(_qa_requires_changes("PASS\\nNo blocking issues found."))
+
     async def test_runs_selected_domain_specialists(self):
         settings = type("SettingsStub", (), {"llm_model": "test-model"})()
         with patch(
