@@ -259,6 +259,15 @@ async def _generate_mike_reply(
     )
 
 
+def _wants_live_openings(query: str) -> bool:
+    """Return whether a Will request asks for current job or internship openings."""
+    return bool(re.search(
+        r"\b(job|jobs|opening|openings|vacancy|vacancies|internship|internships|hiring|recruitment)\b",
+        query,
+        flags=re.IGNORECASE,
+    ))
+
+
 async def _generate_will_reply(
     client: httpx.AsyncClient,
     settings: Settings,
@@ -268,11 +277,7 @@ async def _generate_will_reply(
     if not user_messages:
         raise ValueError("Will needs a career-related request.")
     query = user_messages[-1]
-    wants_live_openings = bool(re.search(
-        r"\b(job|jobs|opening|openings|vacancy|vacancies|internship|internships|hiring|recruitment)\b",
-        query,
-        flags=re.IGNORECASE,
-    ))
+    wants_live_openings = _wants_live_openings(query)
     sources = (
         await search_dustin_web(
             settings,
