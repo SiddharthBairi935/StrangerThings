@@ -268,9 +268,17 @@ async def _generate_will_reply(
     if not user_messages:
         raise ValueError("Will needs a career-related request.")
     query = user_messages[-1]
-    sources = await search_dustin_web(
-        settings,
-        "Current jobs, internships, and career opportunities relevant to: " + query,
+    wants_live_openings = bool(re.search(
+        r"\\b(job|jobs|opening|openings|vacancy|vacancies|internship|internships|hiring|recruitment)\\b",
+        query,
+        flags=re.IGNORECASE,
+    ))
+    sources = (
+        await search_dustin_web(
+            settings,
+            "Current jobs, internships, and career opportunities relevant to: " + query,
+        )
+        if wants_live_openings else []
     )
     system = build_system_prompt("will", [])
     if sources:
