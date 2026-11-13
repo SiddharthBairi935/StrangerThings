@@ -88,6 +88,11 @@ class GitHubWorkspace:
             "GET", f"/repos/{self.repository}/git/trees/{commit['tree']['sha']}",
             params={"recursive": "1"},
         )
+        if tree.get("truncated"):
+            raise HTTPException(
+                status_code=422,
+                detail="Repository tree is too large for a safe bounded coding context.",
+            )
         candidates = sorted(
             {
                 item.get("path", "")
@@ -124,41 +129,52 @@ class GitHubWorkspace:
                                    changes: list[dict[str, str]],
                                    title: str, body: str) -> dict[str, Any]:
         branch = "lucas/task-" + uuid.uuid4().hex[:10]
-        await self._request("POST", f"/repos/{self.repository}/git/refs", json={
-            "ref": f"refs/heads/{branch}", "sha": base_sha,
-        })
-        blobs = []
-        for change in changes:
-            blob = await self._request("POST", f"/repos/{self.repository}/git/blobs", json={
-                "content": change["content"], "encoding": "utf-8",
+        branch_created = False
+        try:
+            await self._request("POST", f"/repos/{self.repository}/git/refs", json={
+                "ref": f"refs/heads/{branch}", "sha": base_sha,
             })
-            blobs.append({
-                "path": change["path"], "mode": "100644",
-                "type": "blob", "sha": blob["sha"],
+            branch_created = True
+            blobs = []
+            for change in changes:
+                blob = await self._request("POST", f"/repos/{self.repository}/git/blobs", json={
+                    "content": change["content"], "encoding": "utf-8",
+                })
+                blobs.append({
+                    "path": change["path"], "mode": "100644",
+                    "type": "blob", "sha": blob["sha"],
+                })
+            base_commit = await self._request(
+                "GET", f"/repos/{self.repository}/git/commits/{base_sha}"
+            )
+            tree = await self._request("POST", f"/repos/{self.repository}/git/trees", json={
+                "base_tree": base_commit["tree"]["sha"], "tree": blobs,
             })
-        base_commit = await self._request(
-            "GET", f"/repos/{self.repository}/git/commits/{base_sha}"
-        )
-        tree = await self._request("POST", f"/repos/{self.repository}/git/trees", json={
-            "base_tree": base_commit["tree"]["sha"], "tree": blobs,
-        })
-        commit = await self._request("POST", f"/repos/{self.repository}/git/commits", json={
-            "message": "Lucas: " + title[:60],
-            "tree": tree["sha"], "parents": [base_sha],
-        })
-        await self._request(
-            "PATCH", f"/repos/{self.repository}/git/refs/heads/{branch}",
-            json={"sha": commit["sha"], "force": False},
-        )
-        pr = await self._request("POST", f"/repos/{self.repository}/pulls", json={
-            "title": title[:120], "body": body[:6000],
-            "head": branch, "base": base, "draft": True,
-        })
-        return {
-            "branch": branch, "pull_request_url": pr["html_url"],
-            "pull_request_number": pr["number"], "commit_sha": commit["sha"],
-        }
-
+            commit = await self._request("POST", f"/repos/{self.repository}/git/commits", json={
+                "message": "Lucas: " + title[:60],
+                "tree": tree["sha"], "parents": [base_sha],
+            })
+            await self._request(
+                "PATCH", f"/repos/{self.repository}/git/refs/heads/{branch}",
+                json={"sha": commit["sha"], "force": False},
+            )
+            pr = await self._request("POST", f"/repos/{self.repository}/pulls", json={
+                "title": title[:120], "body": body[:6000],
+                "head": branch, "base": base, "draft": True,
+            })
+            return {
+                "branch": branch, "pull_request_url": pr["html_url"],
+                "pull_request_number": pr["number"], "commit_sha": commit["sha"],
+            }
+        except Exception:
+            if branch_created:
+                try:
+                    await self._request(
+                        "DELETE", f"/repos/{self.repository}/git/refs/heads/{branch}"
+                    )
+                except Exception:
+                    pass
+            raise
 
 def _allowed_path(path: str) -> bool:
     if (
