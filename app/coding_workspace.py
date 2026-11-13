@@ -49,7 +49,7 @@ SECRET_PATTERNS = (
     re.compile(r"\\bAIza[0-9A-Za-z_-]{30,}\\b"),
     re.compile(r"\\bsk-[A-Za-z0-9_-]{24,}\\b"),
     re.compile(r"(?i)bearer\\s+[A-Za-z0-9._~+/-]{24,}"),
-    re.compile(r"(?i)(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\\s*[:=]\\s*['\\\"][^'\\\"]{12,}['\\\"]"),
+    re.compile(r"(?i)(?:api[_-]?key|access[_-]?token|client[_-]?secret|secret(?:[_-]?key)?|credential|password|token)\\s*[:=]\\s*['\\\"][^'\\\"]{12,}['\\\"]"),
 )
 
 
