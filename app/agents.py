@@ -152,7 +152,7 @@ def route_agent(message: str) -> str:
                   "गूगल ड्राइव")),
         ("lucas", ("debug", "bug", "stack trace", "exception", "python", "django", "flask", "fastapi",
                    "javascript", "typescript", "html", "css", "sass", "scss", "less", "bootstrap",
-                   "tailwind", "react", "next.js", "nextjs", "angular", "vue", "nuxt", "svelte",
+                   "tailwind", "react", "next.js", "nextjs", "angular", "vue", "nuxt", "svelte", "sveltekit",
                    "astro", "redux", "zustand", "playwright", "cypress", "selenium", "jest", "vitest",
                    "flutter", "dart", "react native", "android", "kotlin", "swift", "swiftui",
                    "ionic", "xamarin", ".net maui", "java", "spring", "php", "laravel", "asp.net",
