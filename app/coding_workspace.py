@@ -437,6 +437,17 @@ async def execute_lucas_coding_task(settings: Any, task: str) -> dict[str, Any]:
                         ),
                     )
 
+        # Titles, summaries and QA notes are also published to GitHub; scan
+        # them so a model response cannot leak a credential outside the file patch.
+        if any(
+            _contains_hardcoded_secret(value)
+            for value in (patch["title"], patch["summary"], qa_review)
+        ):
+            raise HTTPException(
+                status_code=422,
+                detail="Lucas produced credential-like metadata; no pull request was created.",
+            )
+
         body = (
             f"## Lucas coding task\n\n{patch['summary']}\n\n"
             f"**Task:** {task}\n\n"
