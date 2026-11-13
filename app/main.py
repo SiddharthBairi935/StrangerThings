@@ -71,6 +71,14 @@ async def require_owner(
     return settings.owner_profile_id
 
 
+@app.get("/api/auth/verify")
+async def verify_owner(
+    profile_id: str = Depends(require_owner),
+) -> dict[str, bool]:
+    """Verify that the supplied bearer token belongs to the configured owner."""
+    return {"authenticated": True}
+
+
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=12000)
     conversation_id: str | None = Field(default=None, min_length=1, max_length=100)
