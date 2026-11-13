@@ -47,7 +47,7 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
     def test_accepts_json_fenced_response(self):
         fence = chr(96) * 3
         patch = _parse_patch(
-            fence + 'json\\n{"files":[{"path":"tests/test_x.py","content":"pass"}]}\\n' + fence
+            fence + "json" + chr(10) + '{"files":[{"path":"tests/test_x.py","content":"pass"}]}' + chr(10) + fence
         )
         self.assertEqual(patch["files"][0]["path"], "tests/test_x.py")
 
