@@ -19,6 +19,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}.shell{display:grid;gri
 <button class="new" id="newChat">＋ &nbsp; New conversation</button>
 <div><div class="section">Your agents</div>
 <div class="agent"><span class="dot"></span> General assistant</div>
+<div class="agent"><span class="dot"></span> Max · Health & fitness</div>
 <div class="agent"><span class="dot"></span> Coding</div>
 <div class="agent"><span class="dot"></span> Research</div>
 <div class="agent planned"><span class="dot"></span> GitHub tools · planned</div>
@@ -30,10 +31,10 @@ button,input,textarea{font:inherit}button{cursor:pointer}.shell{display:grid;gri
 <main class="main">
 <header class="top"><h1>Eleven <span class="muted">/ Workspace</span></h1><div class="status"><span class="dot"></span><span id="statusText">Ready to connect</span></div></header>
 <section class="content">
-<div class="welcome" id="welcome"><div class="orb">L</div><h2>What can I help you with?</h2><p>One assistant. Specialist agents. Your work, in one place.</p><div class="taskbar"><span class="chip">Chat</span><span class="chip">Coding</span><span class="chip">Research</span><span class="chip">Memory</span></div></div>
+<div class="welcome" id="welcome"><div class="orb">L</div><h2>What can I help you with?</h2><p>One assistant. Specialist agents. Your work, in one place.</p><div class="taskbar"><span class="chip">Chat</span><span class="chip">Max · Nutrition & fitness</span><span class="chip">Coding</span><span class="chip">Research</span><span class="chip">Memory</span></div></div>
 <div class="messages" id="messages" aria-live="polite"></div>
 <div class="composer">
-<div class="composebox"><textarea id="message" placeholder="Message Eleven… (Enter to send, Shift+Enter for a new line)"></textarea><div class="actions"><span class="hint" id="agentHint">General assistant will route your request</span><button class="send" id="send">Send ↑</button></div></div>
+<div class="composebox"><textarea id="message" placeholder="Message Eleven or Max… (Enter to send, Shift+Enter for a new line)"></textarea><div class="actions"><span class="hint" id="agentHint">General assistant will route your request</span><button class="send" id="send">Send ↑</button></div></div>
 <div class="connect"><input id="token" type="password" autocomplete="off" placeholder="Paste your ELEVEN_API_TOKEN to connect"><button id="connect">Connect</button><button class="secondary" id="disconnect">Disconnect</button></div>
 <div class="notice" id="notice">Enter the owner token configured on your server. The token is kept in memory for this tab and is not saved to local storage.</div>
 </div>
