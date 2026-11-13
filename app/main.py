@@ -1,6 +1,7 @@
 import secrets
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Literal
 from pathlib import Path
 from uuid import uuid4
 
@@ -18,6 +19,8 @@ from app.database import (
     delete_memory,
     get_memories,
     init_db,
+    save_health_entry,
+    get_health_entries,
     save_memory,
     save_message,
 )
@@ -81,6 +84,12 @@ class MemoryRequest(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
 
 
+class MaxHealthLogRequest(BaseModel):
+    entry_type: Literal["food", "workout", "weight", "measurement", "activity", "note"]
+    data: dict[str, object] = Field(min_length=1)
+    logged_at: str | None = Field(default=None, max_length=40)
+
+
 class LucasDelegationRequest(BaseModel):
     task: str = Field(min_length=1, max_length=12000)
 
@@ -102,6 +111,34 @@ async def health() -> dict[str, str]:
 @app.get("/api/agents")
 async def agents() -> dict[str, object]:
     return {"agents": list_agents()}
+
+
+@app.get("/api/max/logs")
+async def max_health_logs(
+    limit: int = 50,
+    entry_type: Literal["food", "workout", "weight", "measurement", "activity", "note"] | None = None,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, object]:
+    return {
+        "entries": get_health_entries(
+            settings.database_path, profile_id, limit=limit, entry_type=entry_type
+        )
+    }
+
+
+@app.post("/api/max/logs")
+async def max_add_health_log(
+    payload: MaxHealthLogRequest,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, object]:
+    entry_id = save_health_entry(
+        settings.database_path,
+        profile_id,
+        payload.entry_type,
+        payload.data,
+        payload.logged_at,
+    )
+    return {"saved": True, "id": entry_id}
 
 
 @app.post("/api/lucas/delegate")
