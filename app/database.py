@@ -172,7 +172,7 @@ def get_health_entries(
     limit: int = 50,
     entry_type: str | None = None,
 ) -> list[dict[str, Any]]:
-    safe_limit = max(1, min(int(limit), 200))
+    safe_limit = max(1, min(int(limit), 2000))
     with _connect(database_path) as connection:
         if entry_type is None:
             rows = connection.execute(
