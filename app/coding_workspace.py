@@ -42,15 +42,15 @@ MAX_CHANGED_FILES = 16
 MAX_FILE_CHARS = 100_000
 SECRET_PATTERNS = (
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
-    re.compile(r"\\bAKIA[0-9A-Z]{16}\\b"),
-    re.compile(r"\\bgh[pousr]_[A-Za-z0-9_]{20,}\\b"),
-    re.compile(r"\\bglpat-[A-Za-z0-9_-]{20,}\\b"),
-    re.compile(r"\\bxox[baprs]-[A-Za-z0-9-]{20,}\\b"),
-    re.compile(r"\\bAIza[0-9A-Za-z_-]{30,}\\b"),
-    re.compile(r"\\bsk-[A-Za-z0-9_-]{24,}\\b"),
-    re.compile(r"(?i)bearer\\s+[A-Za-z0-9._~+/-]{24,}"),
-    re.compile(r"(?i)\\b(?:[A-Z0-9]+_)*(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)\\b\\s*[:=]\\s*['\\\"][^'\\\"]{12,}['\\\"]"),
-    re.compile(r"(?i)(?:api[_-]?key|access[_-]?token|client[_-]?secret|secret(?:[_-]?key)?|credential|password|token)\\s*[:=]\\s*['\\\"][^'\\\"]{12,}['\\\"]"),
+    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"),
+    re.compile(r"\bglpat-[A-Za-z0-9_-]{20,}\b"),
+    re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{20,}\b"),
+    re.compile(r"\bAIza[0-9A-Za-z_-]{30,}\b"),
+    re.compile(r"\bsk-[A-Za-z0-9_-]{24,}\b"),
+    re.compile(r"(?i)bearer\s+[A-Za-z0-9._~+/-]{24,}"),
+    re.compile(r"(?i)\b(?:[A-Z0-9]+_)*(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)\b\s*[:=]\s*['\\"][^'\\"]{12,}['\\"]"),
+    re.compile(r"(?i)(?:api[_-]?key|access[_-]?token|client[_-]?secret|secret(?:[_-]?key)?|credential|password|token)\s*[:=]\s*['\\"][^'\\"]{12,}['\\"]"),
 )
 
 
