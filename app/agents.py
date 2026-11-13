@@ -133,6 +133,13 @@ def route_agent(message: str) -> str:
     """Choose the best top-level department for a user request."""
     text = " ".join(message.lower().split())
 
+    for explicit_name, agent_name in (
+        ("max", "max"), ("dustin", "dustin"), ("will", "will"),
+        ("mike", "mike"), ("lucas", "lucas"),
+    ):
+        if re.search(r"(?<!\\w)" + re.escape(explicit_name) + r"(?!\\w)", text):
+            return agent_name
+
     routes = (
         ("max", ("workout", "fitness", "diet", "nutrition", "food", "meal", "ate", "eaten", "breakfast", "lunch", "dinner", "snack", "food log", "food diary", "meal plan",
                  "calorie", "calories", "macros", "protein", "carbs", "fat loss", "weight loss", "weight", "weighed", "calorie deficit", "cutting", "bulking",
