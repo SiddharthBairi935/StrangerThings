@@ -70,7 +70,7 @@ class GitHubWorkspace:
                 continue
             if path.startswith("tests/") or path.startswith("app/") or path in ALLOWED_FILES:
                 candidates.append(path)
-        priority = sorted(candidates, key=lambda p: (0 if p.startswith("app/") else 1, p))
+        priority = sorted(candidates, key=lambda p: (0 if p.startswith("tests/") else 1 if p.startswith("app/") else 2, p))
         files: dict[str, str] = {}
         total = 0
         for path in priority[:MAX_CONTEXT_FILES]:
@@ -110,7 +110,7 @@ class GitHubWorkspace:
             "base_tree": base_commit["tree"]["sha"], "tree": blobs,
         })
         commit = await self._request("POST", f"/repos/{self.repository}/git/commits", json={
-            "message": "Lucas: " + title[: sixty := 60],
+            "message": "Lucas: " + title[:60],
             "tree": tree["sha"],
             "parents": [base_sha],
         })
