@@ -37,6 +37,13 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
             "backend/Gemfile",
             "backend/Rakefile",
             "mobile/Package.swift",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yaml",
+            "Dockerfile",
+            "docker-compose.yml",
+            ".dockerignore",
+            "infra/main.tf",
+            "deploy/README.md",
         )
         for path in allowed:
             with self.subTest(path=path):
@@ -47,6 +54,9 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
             "../.env",
             "app/../../secret.py",
             ".github/workflows/deploy.yml",
+            ".github/CODEOWNERS",
+            ".github/dependabot.yml",
+            ".github/workflows/scripts/deploy.yml",
             "app/secret.env",
             "app/secret.json.bak",
             "/tmp/evil.py",
