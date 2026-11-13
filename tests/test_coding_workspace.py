@@ -32,6 +32,11 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
             "pubspec.yaml",
             "pom.xml",
             "go.mod",
+            "backend/go.mod",
+            "backend/go.sum",
+            "backend/Gemfile",
+            "backend/Rakefile",
+            "mobile/Package.swift",
         )
         for path in allowed:
             with self.subTest(path=path):
