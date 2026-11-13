@@ -200,3 +200,13 @@ def get_health_entries(
         }
         for row in rows
     ]
+
+
+def delete_health_entry(database_path: Path, profile_id: str, entry_id: int) -> bool:
+    """Delete one health log belonging to the requesting owner profile."""
+    with _connect(database_path) as connection:
+        cursor = connection.execute(
+            "DELETE FROM health_entries WHERE profile_id = ? AND id = ?",
+            (profile_id, entry_id),
+        )
+        return cursor.rowcount > 0
