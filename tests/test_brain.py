@@ -13,6 +13,9 @@ class AgentHierarchyTests(unittest.TestCase):
     def test_department_routing(self):
         cases = {
             "Plan my workout and diet": "max",
+            "Log my meals and calculate my macros": "max",
+            "Analyse my weekly weight trend": "max",
+            "Suggest a fat loss meal plan": "max",
             "Find jobs on LinkedIn and improve my resume": "will",
             "Find a PDF in Google Drive": "mike",
             "Research the best cloud certifications": "dustin",
@@ -104,6 +107,12 @@ class AgentHierarchyTests(unittest.TestCase):
              if agents[name]["parent"] == "eleven"},
             {"max", "will", "mike", "dustin", "lucas"},
         )
+
+    def test_max_prompt_has_health_safety_and_tracking_scope(self):
+        prompt = build_system_prompt("max", [])
+        self.assertIn("weekly weight averages", prompt)
+        self.assertIn("crash diets", prompt)
+        self.assertIn("registered dietitian", prompt)
 
     def test_specialist_prompt_contains_role_and_memory(self):
         prompt = build_system_prompt("lucas", [{"content": "Prefers Hindi"}])
