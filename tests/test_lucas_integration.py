@@ -2,8 +2,8 @@ import base64
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from fastapi.testclient import TestClient
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
 from app import main
 from app.coding_workspace import GitHubWorkspace, execute_lucas_coding_task
@@ -177,16 +177,15 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
                     "BLOCKED\\nThe QA response was malformed and did not explicitly approve.",
                 ]),
             ),
+            self.assertRaises(HTTPException) as raised,
         ):
-            with self.assertRaises(HTTPException) as raised:
-                await execute_lucas_coding_task(self.settings, "Build a React feature")
+            await execute_lucas_coding_task(self.settings, "Build a React feature")
         self.assertEqual(raised.exception.status_code, 422)
         workspace.publish_pull_request.assert_not_awaited()
         workspace.close.assert_awaited_once()
 
     async def test_coding_task_with_hardcoded_credential_is_rejected_before_github_access(self):
-        with patch("app.coding_workspace.GitHubWorkspace") as workspace_factory:
-            with self.assertRaises(HTTPException) as raised:
+        with patch("app.coding_workspace.GitHubWorkspace") as workspace_factory, self.assertRaises(HTTPException) as raised:
                 await execute_lucas_coding_task(
                     self.settings,
                     'Please use API_KEY = "abcdefghijklmnop12345"',
@@ -243,9 +242,9 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
             patch("app.coding_workspace._chat_completion", new=AsyncMock(return_value="Test strategy")),
             patch("app.coding_workspace._generate_integrated_patch", new=AsyncMock(return_value=patch_with_secret_metadata)),
             patch("app.coding_workspace._review_integrated_patch", new=AsyncMock(return_value="PASS\\nNo blockers.")),
+            self.assertRaises(HTTPException) as raised,
         ):
-            with self.assertRaises(HTTPException) as raised:
-                await execute_lucas_coding_task(self.settings, "Build a React feature")
+            await execute_lucas_coding_task(self.settings, "Build a React feature")
         self.assertEqual(raised.exception.status_code, 422)
         workspace.publish_pull_request.assert_not_awaited()
 
@@ -264,9 +263,8 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
             raise AssertionError(f"Unexpected GitHub request: {method} {path}")
 
         try:
-            with patch.object(workspace, "_request", side_effect=fake_request):
-                with self.assertRaises(HTTPException) as raised:
-                    await workspace.load_context()
+            with patch.object(workspace, "_request", side_effect=fake_request), self.assertRaises(HTTPException) as raised:
+                await workspace.load_context()
             self.assertEqual(raised.exception.status_code, 422)
         finally:
             await workspace.close()
@@ -296,9 +294,8 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
             return {}
 
         try:
-            with patch.object(workspace, "_request", side_effect=fake_request):
-                with self.assertRaises(HTTPException):
-                    await workspace.publish_pull_request(
+            with patch.object(workspace, "_request", side_effect=fake_request), self.assertRaises(HTTPException):
+                await workspace.publish_pull_request(
                         "main",
                         "base-sha",
                         [{"path": "tests/test_feature.py", "content": "def test_feature(): pass"}],
