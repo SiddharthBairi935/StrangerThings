@@ -48,7 +48,7 @@ class HealthSummaryTests(unittest.TestCase):
         self.assertEqual(summary["workout_sessions"], 1)
         self.assertEqual(summary["latest_weight"]["value"], 72.2)
         self.assertEqual(summary["measurements"][0]["waist_cm"], 89)
-        self.assertEqual(len(summary["daily"]), 2)
+        self.assertEqual(len(summary["daily"]), 3)
 
     def test_missing_nutrition_is_not_invented_and_days_are_bounded(self):
         entries = [{
