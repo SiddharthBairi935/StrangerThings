@@ -135,7 +135,7 @@ def route_agent(message: str) -> str:
     routes = (
         ("max", ("workout", "fitness", "diet", "nutrition", "food log", "food diary", "meal plan",
                  "calorie", "calories", "macros", "protein", "carbs", "fat loss", "weight loss",
-                 "weight gain", "body measurement", "body measurements", "muscle", "gym",
+                 "weight gain", "weight trend", "weekly weight", "weight tracking", "body measurement", "body measurements", "muscle", "gym",
                  "body fat", "exercise", "steps", "hydration", "recovery", "वजन", "डाइट",
                  "वर्कआउट", "खाना", "कैलोरी", "प्रोटीन", "मसल")),
         ("will", ("linkedin", "job opening", "job openings", "job search", "freelance",
