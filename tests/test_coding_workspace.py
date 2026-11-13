@@ -95,6 +95,8 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
 
     def test_rejects_hardcoded_secret_like_values(self):
         self.assertTrue(_contains_hardcoded_secret('API_KEY = "1234567890abcdef1234"'))
+        self.assertTrue(_contains_hardcoded_secret("ghp_abcdefghijklmnopqrstuvwxyz123456"))
+        self.assertTrue(_contains_hardcoded_secret('password = "correct-horse-battery"'))
         with self.assertRaises(HTTPException):
             _parse_patch(
                 '{"files":[{"path":"backend/config.py","content":"API_KEY = \\\"1234567890abcdef1234\\\""},'
