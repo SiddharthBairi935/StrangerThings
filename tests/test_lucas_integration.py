@@ -229,6 +229,28 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
         finally:
             await workspace.close()
 
+    async def test_truncated_repository_tree_fails_closed(self):
+        workspace = GitHubWorkspace("token", "owner/repo")
+
+        async def fake_request(method, path, **kwargs):
+            if path == "/repos/owner/repo":
+                return {"default_branch": "main"}
+            if path.endswith("/git/ref/heads/main"):
+                return {"object": {"sha": "base-sha"}}
+            if path.endswith("/git/commits/base-sha"):
+                return {"tree": {"sha": "tree-sha"}}
+            if path.endswith("/git/trees/tree-sha"):
+                return {"truncated": True, "tree": []}
+            raise AssertionError(f"Unexpected GitHub request: {method} {path}")
+
+        try:
+            with patch.object(workspace, "_request", side_effect=fake_request):
+                with self.assertRaises(HTTPException) as raised:
+                    await workspace.load_context()
+            self.assertEqual(raised.exception.status_code, 422)
+        finally:
+            await workspace.close()
+
     async def test_missing_github_configuration_fails_closed(self):
         self.settings.github_token = None
         with self.assertRaises(HTTPException) as raised:
