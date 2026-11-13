@@ -162,7 +162,7 @@ def route_agent(message: str) -> str:
                     "अध्ययन", "तुलना", "रिसर्च")),
     )
     for agent_name, phrases in routes:
-        if any(re.search(r"(?<!\\w)" + re.escape(phrase) + r"(?!\\w)", text) for phrase in phrases):
+        if any(re.search(r"(?<!\w)" + re.escape(phrase) + r"(?!\w)", text) for phrase in phrases):
             return agent_name
     return "eleven"
 
