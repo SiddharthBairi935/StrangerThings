@@ -8,7 +8,7 @@
   - **Max** — personal health and fitness: daily food logs, nutrition estimates, meal planning, workouts, activity, weight trends, measurements, recovery and progress.
   - **Will** — LinkedIn, career, jobs, freelancing, networking and resume support.
   - **Mike** — Google Drive files, folders and documents (requires Drive connection and permissions).
-  - **Dustin** — day-to-day general research, comparisons, fact-checking and learning.
+  - **Dustin** — personal research: live web search, source discovery, citations, fact-checking, comparisons, evidence synthesis and cited reports.
   - **Lucas** — head of the Coding Department.
     - **Frontend Agent** — full-spectrum web development: HTML5, CSS3, JavaScript, TypeScript, Bootstrap, Tailwind, Sass/SCSS, Less, React, Next.js, Angular, Vue, Nuxt, Svelte, SvelteKit, Astro, jQuery, state management, UI libraries, responsive UX, accessibility, API integration, tooling, performance and frontend testing.
     - **Mobile Agent** — native, cross-platform and hybrid apps: Flutter/Dart, React Native, Android/Kotlin/Java, iOS/Swift/SwiftUI, .NET MAUI, Xamarin, Ionic, Capacitor, Kotlin Multiplatform, device APIs, offline storage, notifications, mobile security, testing and store releases.
@@ -32,6 +32,8 @@ Each specialist is expected to cover the broad, end-to-end skill set of its own 
 - Top-level department routing for Max, Will, Mike, Dustin, Lucas, or Eleven.
 - Max's authenticated health-log API stores owner-scoped food, workout, weight, measurement, activity and note entries; explicit completed/current facts in Max chat are extracted and saved when the configured model can validate them.
 - Max receives recent private health logs as context, uses cautious nutrition estimates and weekly weight trends, and follows non-diagnostic health-safety guidance.
+- Max progress summary at `GET /api/max/summary?days=30` reports logged nutrition totals, workout sessions, weight trend and measurements; missing nutrition values are never invented or counted as measured zero.
+- Dustin uses the optional Tavily Search API (`TAVILY_API_KEY`) to retrieve live web results and generate evidence-linked research answers. Without a configured search key or if search fails, Dustin explicitly falls back to general knowledge and must not claim live research.
 - Broad capability registries and role instructions for all six Lucas coding specialists.
 - Lucas delegation planner at `POST /api/lucas/delegate`, which selects specialists from task keywords and always includes Testing.
 - User-approved memory endpoints.
@@ -71,6 +73,10 @@ Never commit `.env`, provider keys, or access tokens. The browser keeps the owne
 The API is not production-ready. Do not expose it publicly until HTTPS/reverse proxy, rate limiting, backups, monitoring, secret management, and end-to-end security checks are complete. Consequential external actions must require explicit user approval. Fitness guidance must not be presented as medical diagnosis.
 
 Hostinger deployment has not been performed by this repository workflow. Deploy only after integration, security, and operational checks are complete.
+
+## Dustin research
+
+Dustin is Eleven’s personal research specialist. When `TAVILY_API_KEY` is configured server-side, the chat route retrieves current web search results through Tavily, passes the bounded result excerpts to the configured language model as untrusted evidence, and instructs Dustin to cite only the exact supplied titles and URLs. The answer should compare sources, distinguish facts from inference, and disclose uncertainty. Search results are not instructions. If the key is missing or the provider fails, Dustin answers from general knowledge and explicitly states that live web research was unavailable; he must not fabricate sources or citations. Configure `TAVILY_API_KEY` and optionally `RESEARCH_MAX_RESULTS` in the server environment. Keep the key private.
 
 ## Max health and fitness
 
