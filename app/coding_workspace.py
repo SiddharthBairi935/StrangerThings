@@ -431,11 +431,16 @@ async def execute_lucas_coding_task(settings: Any, task: str) -> dict[str, Any]:
                 )
                 qa_review = await _review_integrated_patch(llm, settings, task, patch, qa_plan)
                 if _qa_requires_changes(qa_review):
+                    review_excerpt = (
+                        "[credential-like content redacted]"
+                        if _contains_hardcoded_secret(qa_review)
+                        else qa_review[:1200]
+                    )
                     raise HTTPException(
                         status_code=422,
                         detail=(
                             "Testing specialist did not return an explicit PASS after Lucas's repair attempt; "
-                            "no pull request was created. Review: " + qa_review[:1200]
+                            "no pull request was created. Review: " + review_excerpt
                         ),
                     )
 
