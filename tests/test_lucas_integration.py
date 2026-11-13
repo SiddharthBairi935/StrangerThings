@@ -186,9 +186,9 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_coding_task_with_hardcoded_credential_is_rejected_before_github_access(self):
         with patch("app.coding_workspace.GitHubWorkspace") as workspace_factory, self.assertRaises(HTTPException) as raised:
-                await execute_lucas_coding_task(
-                    self.settings,
-                    'Please use API_KEY = "abcdefghijklmnop12345"',
+            await execute_lucas_coding_task(
+                self.settings,
+                'Please use API_KEY = "abcdefghijklmnop12345"',
                 )
         self.assertEqual(raised.exception.status_code, 422)
         workspace_factory.assert_not_called()
@@ -296,12 +296,12 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
         try:
             with patch.object(workspace, "_request", side_effect=fake_request), self.assertRaises(HTTPException):
                 await workspace.publish_pull_request(
-                        "main",
-                        "base-sha",
-                        [{"path": "tests/test_feature.py", "content": "def test_feature(): pass"}],
-                        "Test feature",
-                        "Body",
-                    )
+                    "main",
+                    "base-sha",
+                    [{"path": "tests/test_feature.py", "content": "def test_feature(): pass"}],
+                    "Test feature",
+                    "Body",
+                )
             self.assertTrue(any(method == "DELETE" and "/git/refs/heads/lucas/task-" in path for method, path in calls))
         finally:
             await workspace.close()
