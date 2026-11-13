@@ -2,11 +2,19 @@ import unittest
 
 from app.agents import list_agents, route_agent
 from app.brain import (
+    search_dustin_web,
     build_lucas_synthesis_prompt,
     build_specialist_prompt,
     build_system_prompt,
 )
 from app.delegation import create_lucas_plan
+from app.config import Settings
+
+
+class DustinSearchTests(unittest.IsolatedAsyncioTestCase):
+    async def test_live_search_is_not_attempted_without_provider_key(self):
+        settings = Settings(tavily_api_key=None)
+        self.assertEqual(await search_dustin_web(settings, "latest AI research"), [])
 
 
 class AgentHierarchyTests(unittest.TestCase):
