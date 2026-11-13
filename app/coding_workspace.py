@@ -26,6 +26,7 @@ ALLOWED_ROOT_FILES = {
     "settings.gradle", "settings.gradle.kts", "gradle.properties",
     "composer.json", "composer.lock", "Gemfile", "Gemfile.lock",
     "Directory.Build.props", "global.json", "NuGet.Config",
+    "Package.swift", "Package.resolved", "Podfile", "Rakefile",
 }
 ALLOWED_SUFFIXES = {
     ".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx",
@@ -33,7 +34,7 @@ ALLOWED_SUFFIXES = {
     ".json", ".dart", ".java", ".kt", ".kts", ".swift",
     ".cs", ".csproj", ".sln", ".php", ".go", ".rs", ".rb",
     ".sql", ".md", ".txt", ".xml", ".gradle", ".properties",
-    ".yaml", ".yml", ".toml",
+    ".yaml", ".yml", ".toml", ".mod", ".sum", ".lock",
 }
 MAX_CONTEXT_FILES = 32
 MAX_CONTEXT_CHARS = 140_000
