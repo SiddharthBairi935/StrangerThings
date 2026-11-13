@@ -2,13 +2,13 @@ import unittest
 
 from app.agents import list_agents, route_agent
 from app.brain import (
-    search_dustin_web,
     build_lucas_synthesis_prompt,
     build_specialist_prompt,
     build_system_prompt,
+    search_dustin_web,
 )
-from app.delegation import create_lucas_plan
 from app.config import Settings
+from app.delegation import create_lucas_plan
 
 
 class DustinSearchTests(unittest.IsolatedAsyncioTestCase):
