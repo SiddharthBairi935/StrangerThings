@@ -172,7 +172,7 @@ class GitHubWorkspace:
                     await self._request(
                         "DELETE", f"/repos/{self.repository}/git/refs/heads/{branch}"
                     )
-                except Exception:
+                except (HTTPException, httpx.HTTPError):
                     pass
             raise
 
