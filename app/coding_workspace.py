@@ -262,6 +262,10 @@ async def _chat_completion(client: httpx.AsyncClient, settings: Any,
     return answer.strip()
 
 
+def _qa_requires_changes(review: str) -> bool:
+    return review.lstrip().upper().startswith("NEEDS_CHANGES")
+
+
 def _repository_context(files: dict[str, str]) -> str:
     return "\n\n".join(f"--- {path} ---\n{source}" for path, source in files.items())
 
@@ -381,12 +385,20 @@ async def execute_lucas_coding_task(settings: Any, task: str) -> dict[str, Any]:
             )
             qa_review = await _review_integrated_patch(llm, settings, task, patch, qa_plan)
             repair_attempted = False
-            if qa_review.lstrip().upper().startswith("NEEDS_CHANGES"):
+            if _qa_requires_changes(qa_review):
                 repair_attempted = True
                 patch = await _generate_integrated_patch(
                     llm, settings, task, context, specialist_plans, qa_plan, qa_review
                 )
                 qa_review = await _review_integrated_patch(llm, settings, task, patch, qa_plan)
+                if _qa_requires_changes(qa_review):
+                    raise HTTPException(
+                        status_code=422,
+                        detail=(
+                            "Testing specialist still reports blockers after Lucas's repair attempt; "
+                            "no pull request was created. Review: " + qa_review[:1200]
+                        ),
+                    )
 
         body = (
             f"## Lucas coding task\n\n{patch['summary']}\n\n"
