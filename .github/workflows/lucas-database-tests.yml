@@ -13,6 +13,7 @@ jobs:
   postgres-smoke:
     name: PostgreSQL migrations and SQL assertions
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:16
