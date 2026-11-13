@@ -15,7 +15,7 @@ class AgentInfo:
 # It does not imply that external accounts or tools are connected.
 AGENTS: tuple[AgentInfo, ...] = (
     AgentInfo("eleven", "Eleven (11) / L", "Main assistant, central brain, task planner, and coordinator for every department.", "active", None, ("chat", "planning", "delegation", "coordination")),
-    AgentInfo("max", "Max", "Health and fitness: diet planning, workouts, activity, weight, measurements, and progress. Not a medical diagnostician.", "active", "eleven", ("diet", "fitness", "workouts", "progress")),
+    AgentInfo("max", "Max", "Personal health and fitness coach: food logs, nutrition estimates, meal planning, workouts, activity, weight trends, measurements, recovery, and progress. Not a medical diagnostician.", "active", "eleven", ("diet", "nutrition", "food_logging", "calorie_estimates", "macros", "meal_planning", "fitness", "workouts", "exercise_tracking", "weight_tracking", "body_measurements", "progress", "recovery", "habit_coaching")),
     AgentInfo("will", "Will", "LinkedIn and career: professional profile, job search, freelancing, networking, and resume support.", "planned", "eleven", ("linkedin", "jobs", "freelance", "resume")),
     AgentInfo("mike", "Mike", "Google Drive: find, organize, read, summarize, and manage files with connected and approved Drive access.", "planned", "eleven", ("drive", "files", "documents")),
     AgentInfo("dustin", "Dustin", "General day-to-day research, comparisons, fact-checking, learning, and evidence-based recommendations.", "active", "eleven", ("research", "compare", "fact_check")),
@@ -133,8 +133,11 @@ def route_agent(message: str) -> str:
     text = " ".join(message.lower().split())
 
     routes = (
-        ("max", ("workout", "fitness", "diet", "calorie", "weight loss", "weight gain",
-                 "muscle", "gym", "protein", "body fat", "exercise", "वजन", "डाइट", "वर्कआउट")),
+        ("max", ("workout", "fitness", "diet", "nutrition", "food log", "food diary", "meal plan",
+                 "calorie", "calories", "macros", "protein", "carbs", "fat loss", "weight loss",
+                 "weight gain", "body measurement", "body measurements", "muscle", "gym",
+                 "body fat", "exercise", "steps", "hydration", "recovery", "वजन", "डाइट",
+                 "वर्कआउट", "खाना", "कैलोरी", "प्रोटीन", "मसल")),
         ("will", ("linkedin", "job opening", "job openings", "job search", "freelance",
                   "freelancing", "resume", "cv", "career", "नौकरी", "रिज्यूमे")),
         ("mike", ("google drive", "drive file", "drive folder", "my documents", "file in drive",
@@ -170,9 +173,7 @@ AGENT_INSTRUCTIONS = {
         "performed work unless execution was actually confirmed."
     ),
     "max": (
-        "You are Max, responsible for fitness, diet, workouts, activity, body measurements, "
-        "and progress. Give practical, balanced guidance, ask for missing context when needed, "
-        "and do not diagnose medical conditions or replace a clinician."
+        "You are Max, Eleven’s personal health and fitness specialist. Manage daily food and drink logs, estimate calories and macros with clearly stated uncertainty, compare intake with the user’s goals, suggest practical meals and substitutions, plan and review workouts, track activity and recovery, interpret weight trends and body measurements, and give realistic progress projections as ranges rather than promises. Ask for missing quantities, cooked/raw state, brands, preparation methods, workout sets/reps, and weigh-in conditions when these materially affect an estimate. Prefer weekly weight averages over single-day fluctuations. Never shame the user, prescribe crash diets, encourage extreme deficits, diagnose conditions, or change medication. Flag symptoms, eating-disorder signals, unsafe restriction, or medical concerns and recommend a qualified clinician or registered dietitian. Do not infer that a food or workout was completed unless the user logged it. Treat logged health data as private, use only the owner’s records, and distinguish estimates from measured facts."
     ),
     "will": (
         "You are Will, responsible for LinkedIn and career support: profile improvement, jobs, "
