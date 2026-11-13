@@ -51,6 +51,10 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
             "app/secret.json.bak",
             "/tmp/evil.py",
             "frontend/../../../etc/passwd",
+            "app/file?.py",
+            "app/file#.py",
+            "app/file%2fsecret.py",
+            "app/file name.py",
             "unknown_area/source.py",
             "frontend\\\\windows.py",
         )
@@ -104,6 +108,9 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
     def test_rejects_hardcoded_secret_like_values(self):
         self.assertTrue(_contains_hardcoded_secret('API_KEY = "1234567890abcdef1234"'))
         self.assertTrue(_contains_hardcoded_secret("ghp_abcdefghijklmnopqrstuvwxyz123456"))
+        self.assertTrue(_contains_hardcoded_secret("glpat-abcdefghijklmnopqrstuvwxyz123456"))
+        self.assertTrue(_contains_hardcoded_secret("xoxb-123456789012345678901234"))
+        self.assertTrue(_contains_hardcoded_secret("Authorization: Bearer abcdefghijklmnopqrstuvwxyz123456"))
         self.assertTrue(_contains_hardcoded_secret('password = "correct-horse-battery"'))
         with self.assertRaises(HTTPException):
             _parse_patch(
