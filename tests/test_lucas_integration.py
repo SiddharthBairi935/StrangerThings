@@ -1,3 +1,4 @@
+import base64
 import unittest
 from unittest.mock import AsyncMock, patch
 
@@ -179,6 +180,54 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(raised.exception.status_code, 422)
         workspace.publish_pull_request.assert_not_awaited()
         workspace.close.assert_awaited_once()
+
+    async def test_coding_task_with_hardcoded_credential_is_rejected_before_github_access(self):
+        with patch("app.coding_workspace.GitHubWorkspace") as workspace_factory:
+            with self.assertRaises(HTTPException) as raised:
+                await execute_lucas_coding_task(
+                    self.settings,
+                    'Please use API_KEY = "abcdefghijklmnop12345"',
+                )
+        self.assertEqual(raised.exception.status_code, 422)
+        workspace_factory.assert_not_called()
+
+    async def test_context_loader_skips_source_files_containing_credentials(self):
+        workspace = GitHubWorkspace("token", "owner/repo")
+        safe_source = "def add(left, right):\\n    return left + right\\n"
+        secret_source = 'API_KEY = "abcdefghijklmnop12345"\\n'
+
+        async def fake_request(method, path, **kwargs):
+            if path == "/repos/owner/repo":
+                return {"default_branch": "main"}
+            if path.endswith("/git/ref/heads/main"):
+                return {"object": {"sha": "base-sha"}}
+            if path.endswith("/git/commits/base-sha"):
+                return {"tree": {"sha": "tree-sha"}}
+            if path.endswith("/git/trees/tree-sha"):
+                return {
+                    "tree": [
+                        {"path": "app/safe.py", "type": "blob"},
+                        {"path": "app/secret.py", "type": "blob"},
+                    ]
+                }
+            if path.endswith("/contents/app/safe.py"):
+                return {
+                    "encoding": "base64",
+                    "content": base64.b64encode(safe_source.encode()).decode(),
+                }
+            if path.endswith("/contents/app/secret.py"):
+                return {
+                    "encoding": "base64",
+                    "content": base64.b64encode(secret_source.encode()).decode(),
+                }
+            raise AssertionError(f"Unexpected GitHub request: {method} {path}")
+
+        try:
+            with patch.object(workspace, "_request", side_effect=fake_request):
+                _, _, files = await workspace.load_context()
+            self.assertEqual(set(files), {"app/safe.py"})
+        finally:
+            await workspace.close()
 
     async def test_missing_github_configuration_fails_closed(self):
         self.settings.github_token = None
