@@ -19,7 +19,7 @@ AGENTS: tuple[AgentInfo, ...] = (
     AgentInfo("will", "Will", "LinkedIn and career: professional profile, job search, freelancing, networking, and resume support.", "planned", "eleven", ("linkedin", "jobs", "freelance", "resume")),
     AgentInfo("mike", "Mike", "Google Drive: find, organize, read, summarize, and manage files with connected and approved Drive access.", "planned", "eleven", ("drive", "files", "documents")),
     AgentInfo("dustin", "Dustin", "General day-to-day research, comparisons, fact-checking, learning, and evidence-based recommendations.", "active", "eleven", ("research", "compare", "fact_check")),
-    AgentInfo("lucas", "Lucas", "Head of the Coding Department. Delegates engineering work to five equal-level coding specialists and coordinates their results.", "active", "eleven", ("software_development", "code_review", "coordination")),
+    AgentInfo("lucas", "Lucas", "Head of the Coding Department. Delegates engineering work to six equal-level coding specialists and coordinates their results.", "active", "eleven", ("software_development", "code_review", "coordination")),
     AgentInfo("frontend", "Frontend Agent", "Full-spectrum frontend engineering: HTML, CSS, JavaScript, TypeScript, web frameworks, UI systems, responsive UX, accessibility, APIs, tooling, performance, and frontend testing.", "active", "lucas", (
         "html", "html5", "css", "css3", "javascript", "es6_plus", "typescript",
         "bootstrap", "tailwind_css", "sass", "scss", "less",
@@ -96,9 +96,24 @@ AGENTS: tuple[AgentInfo, ...] = (
         "root_cause_analysis", "coverage_analysis", "ci_cd_testing",
         "release_validation", "quality_reporting",
     )),
+    AgentInfo("devops", "DevOps Agent", "Delivery and operations engineering: CI/CD, GitHub Actions, Docker, deployment architecture, infrastructure as code, release and rollback, monitoring, incident response, operational runbooks, and DevOps security. Production changes require explicit approval.", "active", "lucas", (
+        "ci_cd", "github_actions", "workflow_automation", "build_pipelines",
+        "test_automation", "artifact_management", "docker", "dockerfile",
+        "docker_compose", "container_security", "container_registry",
+        "linux", "bash", "powershell", "nginx", "apache", "reverse_proxy",
+        "dns", "tls", "ssl", "https", "environment_configuration",
+        "secrets_management", "least_privilege", "oidc", "terraform",
+        "infrastructure_as_code", "ansible", "kubernetes", "helm",
+        "cloud_deployment", "provider_independent_deployment", "release_management",
+        "blue_green_deployment", "rolling_deployment", "rollback",
+        "health_checks", "monitoring", "logging", "metrics", "tracing",
+        "observability", "uptime", "incident_response", "runbooks",
+        "dependency_scanning", "supply_chain_security", "workflow_security",
+        "backup_strategy", "disaster_recovery",
+    )),
 )
 
-
+ 
 def list_agents() -> list[dict[str, object]]:
     return [
         {
@@ -131,6 +146,9 @@ def route_agent(message: str) -> str:
                    "flutter", "dart", "react native", "android", "kotlin", "swift", "swiftui",
                    "ionic", "xamarin", ".net maui", "java", "spring", "php", "laravel", "asp.net",
                    "c#", "c++", "rust", "ruby", "golang", "node.js", "nestjs", "express",
+                   "devops", "ci/cd", "ci cd", "github actions", "docker", "dockerfile",
+                   "docker compose", "deploy", "deployment", "terraform", "kubernetes",
+                   "nginx", "monitoring", "observability", "pipeline", "hostinger",
                    "sql", "database", "mongodb", "postgres", "mysql", "redis", "cassandra",
                    "dynamodb", "api", "code", "coding", "program", "function", "github repo",
                    "ऐप बनाओ", "कोड")),
@@ -172,11 +190,11 @@ AGENT_INSTRUCTIONS = {
         "facts from inference, and state uncertainty."
     ),
     "lucas": (
-        "You are Lucas, head of the Coding Department. You coordinate five equal-level, "
+        "You are Lucas, head of the Coding Department. You coordinate six equal-level, "
         "domain-complete specialists: Frontend (full-spectrum web), Mobile (native, cross-platform "
         "and hybrid mobile), Backend (server-side languages and systems), Database (relational, "
         "NoSQL, analytics and data infrastructure), and Testing (manual, automation, performance, "
-        "security and release QA). Match tasks to the right specialist or combination, coordinate "
+        "security and release QA), and DevOps (CI/CD, containers, infrastructure, deployment, observability, incident response and delivery security). Match tasks to the right specialist or combination, coordinate "
         "interfaces and dependencies, integrate results, require independent verification, and "
         "report exactly what was and was not executed. A listed capability is knowledge scope, not "
         "proof a tool/runtime is installed or connected. Do not claim repository changes unless a "

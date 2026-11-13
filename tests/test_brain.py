@@ -28,20 +28,31 @@ class AgentHierarchyTests(unittest.TestCase):
             "Build a React Native app": "lucas",
             "Create a SwiftUI iOS app": "lucas",
             "Build a Rust microservice": "lucas",
+            "Create a GitHub Actions CI/CD pipeline": "lucas",
+            "Deploy my app with Docker and Nginx": "lucas",
             "Hello Eleven": "eleven",
         }
         for message, expected in cases.items():
             with self.subTest(message=message):
                 self.assertEqual(route_agent(message), expected)
 
-    def test_lucas_has_five_equal_level_specialists(self):
+    def test_lucas_has_six_equal_level_specialists(self):
         agents = {item["name"]: item for item in list_agents()}
         self.assertEqual(agents["lucas"]["parent"], "eleven")
-        specialist_names = {"frontend", "mobile", "backend", "database", "testing"}
+        specialist_names = {"frontend", "mobile", "backend", "database", "testing", "devops"}
         self.assertEqual(
             {name for name, item in agents.items() if item["parent"] == "lucas"},
             specialist_names,
         )
+
+    def test_lucas_has_six_equal_level_specialists_including_devops(self):
+        agents = {item["name"]: item for item in list_agents()}
+        expected = {"frontend", "mobile", "backend", "database", "testing", "devops"}
+        self.assertEqual(
+            {name for name, item in agents.items() if item["parent"] == "lucas"},
+            expected,
+        )
+        self.assertTrue({"github_actions", "docker", "terraform", "monitoring", "rollback"}.issubset(set(agents["devops"]["capabilities"])))
 
     def test_frontend_agent_has_broad_frontend_capabilities(self):
         agents = {item["name"]: item for item in list_agents()}
@@ -98,6 +109,11 @@ class AgentHierarchyTests(unittest.TestCase):
         prompt = build_system_prompt("lucas", [{"content": "Prefers Hindi"}])
         self.assertIn("head of the Coding Department", prompt)
         self.assertIn("Prefers Hindi", prompt)
+
+    def test_devops_tasks_route_to_devops_and_testing(self):
+        for task in ("Create a GitHub Actions CI/CD pipeline", "Deploy a Docker Compose app", "Add Terraform infrastructure and monitoring"):
+            with self.subTest(task=task):
+                self.assertEqual(create_lucas_plan(task)["specialists"], ["devops", "testing"])
 
     def test_flutter_task_routes_to_mobile_and_testing(self):
         plan = create_lucas_plan("Fix the Flutter dashboard UI and test the screen")

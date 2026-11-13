@@ -15,8 +15,9 @@
     - **Backend Agent** — Java/Spring, Python/Django/Flask/FastAPI, PHP/Laravel, C#/.NET/ASP.NET, Node.js/Express/NestJS, Go, Ruby, Rust, C/C++, APIs, distributed systems, authentication, security, integrations and deployment.
     - **Database Agent** — relational, NoSQL, cache, search, graph, time-series and cloud data platforms including PostgreSQL, MySQL, SQL Server, Oracle, SQLite, MongoDB, Redis, Cassandra, DynamoDB, Firebase/Firestore, schema design, optimization, migrations, backup, replication and security.
     - **Testing Agent** — manual and automated QA across web, mobile, API and database layers; unit, integration, system, end-to-end, regression, performance, load, security, accessibility and release testing; Selenium, Playwright, Cypress, Appium, Jest, Vitest, Pytest, JUnit, Postman, JMeter and k6.
+    - **DevOps Agent** — CI/CD and GitHub Actions, Docker/Compose, build and artifact pipelines, environment configuration, Linux/Nginx, TLS, infrastructure as code, deployment architecture, release/rollback, monitoring, logs, health checks, incident response, operational runbooks, dependency/workflow/container security. Production changes require explicit approval.
 
-Lucas's five coding specialists are peers at the same level. Lucas coordinates their work and reports to Eleven.
+Lucas's six coding specialists are peers at the same level. Lucas coordinates their work and reports to Eleven.
 
 ## Specialist skill policy
 
@@ -29,12 +30,16 @@ Each specialist is expected to cover the broad, end-to-end skill set of its own 
 - Configurable OpenAI-compatible model provider.
 - Agent hierarchy registry at `GET /api/agents`.
 - Top-level department routing for Max, Will, Mike, Dustin, Lucas, or Eleven.
-- Broad capability registries and role instructions for all five Lucas coding specialists.
+- Broad capability registries and role instructions for all six Lucas coding specialists.
 - Lucas delegation planner at `POST /api/lucas/delegate`, which selects specialists from task keywords and always includes Testing.
 - User-approved memory endpoints.
 - GitHub Actions test workflow.
 
-**Important:** Lucas uses role-separated calls to the configured model for his five peer specialists; they are not separate independently hosted models. The GitHub coding workspace now coordinates relevant domain specialists, obtains an independent Testing review, integrates a structured multi-language patch, validates paths and secret-like content, and opens a dedicated draft pull request. The application never executes generated code or arbitrary shell commands. CI results must be checked on GitHub before a pull request is merged. A registered capability describes knowledge scope; it does not mean a runtime, external account, device, or tool is installed or connected.
+**Important:** Lucas uses role-separated calls to the configured model for his six peer specialists; they are not separate independently hosted models. The GitHub coding workspace now coordinates relevant domain specialists, obtains an independent Testing review, integrates a structured multi-language patch, validates paths and secret-like content, and opens a dedicated draft pull request. The application never executes generated code or arbitrary shell commands. CI results must be checked on GitHub before a pull request is merged. A registered capability describes knowledge scope; it does not mean a runtime, external account, device, or tool is installed or connected.
+
+## DevOps operating boundary
+
+The DevOps specialist can design and propose GitHub Actions workflows, Docker/Compose files, deployment configuration, infrastructure-as-code changes, release/rollback plans, monitoring and runbooks through the guarded GitHub pull-request workflow. The coding workspace does not run shell commands, build containers, provision infrastructure, deploy applications, or inspect live production systems. CI status must be verified from GitHub Actions. Production deployment, destructive infrastructure changes, and secret modifications always require explicit user approval. Hostinger credentials and provider-specific automation can be added later; no Hostinger access is assumed.
 
 ## Local setup
 

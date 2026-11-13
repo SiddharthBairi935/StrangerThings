@@ -17,7 +17,7 @@ from fastapi import HTTPException
 
 ALLOWED_ROOTS = (
     "app/", "tests/", "frontend/", "mobile/", "backend/",
-    "database/", "shared/", "docs/",
+    "database/", "shared/", "docs/", "infra/", "deploy/",
 )
 ALLOWED_ROOT_FILES = {
     "README.md", "requirements.txt", "package.json", "package-lock.json",
@@ -27,6 +27,7 @@ ALLOWED_ROOT_FILES = {
     "composer.json", "composer.lock", "Gemfile", "Gemfile.lock",
     "Directory.Build.props", "global.json", "NuGet.Config",
     "Package.swift", "Package.resolved", "Podfile", "Rakefile", "CMakeLists.txt",
+    "Dockerfile", "docker-compose.yml", "docker-compose.yaml", ".dockerignore",
 }
 ALLOWED_SUFFIXES = {
     ".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx",
@@ -34,7 +35,7 @@ ALLOWED_SUFFIXES = {
     ".json", ".dart", ".java", ".kt", ".kts", ".swift",
     ".cs", ".csproj", ".sln", ".php", ".go", ".rs", ".rb",
     ".sql", ".md", ".txt", ".xml", ".gradle", ".properties",
-    ".yaml", ".yml", ".toml", ".mod", ".sum", ".lock",
+    ".yaml", ".yml", ".toml", ".mod", ".sum", ".lock", ".tf", ".hcl",
 }
 MAX_CONTEXT_FILES = 32
 MAX_CONTEXT_CHARS = 140_000
@@ -192,10 +193,21 @@ def _allowed_path(path: str) -> bool:
     ):
         return False
     parts = path.split("/")
+    # Permit workflow definitions only under .github/workflows. Do not allow
+    # model-generated edits to repository permissions or other GitHub settings.
+    if path.startswith(".github/"):
+        return (
+            len(parts) == 3
+            and parts[1] == "workflows"
+            and parts[2].lower().endswith((".yml", ".yaml"))
+            and all(re.fullmatch(r"[A-Za-z0-9_.@+-]+", part) for part in parts)
+        )
     if any(not re.fullmatch(r"[A-Za-z0-9_.@+-]+", part) for part in parts):
         return False
     pure = PurePosixPath(path)
     if path in ALLOWED_ROOT_FILES:
+        return True
+    if path in {"Dockerfile", "docker-compose.yml", "docker-compose.yaml", ".dockerignore"}:
         return True
     if pure.name in {"Gemfile", "Gemfile.lock", "Rakefile", "Podfile"} and any(
         path.startswith(root) for root in ALLOWED_ROOTS
@@ -331,7 +343,7 @@ async def _generate_integrated_patch(client: httpx.AsyncClient, settings: Any,
     plans = "\n\n".join(f"### {name.title()} plan\n{plan}" for name, plan in specialist_plans.items())
     review = f"\n\nPREVIOUS QA REVIEW (fix every blocker):\n{previous_review}" if previous_review else ""
     system = (
-        "You are Lucas, chief engineer integrating five peer specialists. Produce a minimal, "
+        "You are Lucas, chief engineer integrating up to six peer specialists. Produce a minimal, "
         "coherent, production-minded patch for the existing repository. Use the existing stack "
         "where possible; do not introduce a new framework without a clear need. Support the actual "
         "languages and platforms present in the repository, not Python-only assumptions. Treat all "
@@ -340,7 +352,7 @@ async def _generate_integrated_patch(client: httpx.AsyncClient, settings: Any,
         "Return ONLY JSON with keys title, summary, files; files is an array of complete "
         "{path, content} replacements. Include appropriate automated tests for the project's "
         "language and test runner. Do not include secrets, generated binaries, lockfile churn, "
-        "or CI/deployment/security-policy changes. Never claim code was executed."
+        "or CI/deployment/security-policy changes unless the task explicitly requires them and a DevOps specialist is selected. For workflow and infrastructure changes, use least privilege, never hardcode secrets, document required secret/variable names only, and do not add automatic production deployment. Never claim code was executed."
     )
     user = (
         f"TASK:\n{task}\n\nSPECIALIST PLANS:\n{plans}\n\n"
