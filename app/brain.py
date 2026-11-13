@@ -220,7 +220,7 @@ async def _generate_mike_reply(
             )}, {"role": "user", "content": query_text}],
         )
     search_terms = re.sub(
-        r"\\b(find|search|locate|show|open|read|summarize|summarise|my|in|on|from|google|drive|file|files|document|documents|please|can you|could you)\\b",
+        r"\b(find|search|locate|show|open|read|summarize|summarise|my|in|on|from|google|drive|file|files|document|documents|please|can you|could you)\b",
         " ", query_text, flags=re.IGNORECASE,
     )
     search_terms = " ".join(search_terms.split()).strip(" .?!,")
