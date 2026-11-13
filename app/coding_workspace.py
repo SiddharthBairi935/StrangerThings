@@ -138,8 +138,9 @@ def _allowed_path(path: str) -> bool:
 def _parse_patch(raw: str) -> dict[str, Any]:
     text = raw.strip()
     if text.startswith("```"):
-        text = re.sub(r"^\`\`\`(?:json)?\\s*", "", text)
-        text = re.sub(r"\\s*\`\`\`$", "", text)
+        text = text.split("\n", 1)[1] if "\n" in text else ""
+        if text.rstrip().endswith("```"):
+            text = text.rstrip().rsplit("\n", 1)[0]
     try:
         value = json.loads(text)
     except json.JSONDecodeError as exc:
