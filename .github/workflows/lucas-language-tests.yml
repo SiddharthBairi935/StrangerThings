@@ -121,19 +121,28 @@ jobs:
           test "${#projects[@]}" -gt 0
           for project in "${projects[@]}"; do dotnet test "$project" --verbosity minimal; done
 
-      - name: Set up Gradle project Java
+      - name: Set up Java for Gradle projects
         if: ${{ hashFiles('**/build.gradle') != '' || hashFiles('**/build.gradle.kts') != '' }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
+      - name: Set up Gradle
+        if: ${{ hashFiles('**/build.gradle') != '' || hashFiles('**/build.gradle.kts') != '' }}
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
       - name: Run Gradle tests
         if: ${{ hashFiles('**/build.gradle') != '' || hashFiles('**/build.gradle.kts') != '' }}
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: current
-          arguments: test
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' manifest; do
+            project_dir="$(dirname "$manifest")"
+            gradle --no-daemon -p "$project_dir" test
+          done < <(find . \( -name build.gradle -o -name build.gradle.kts \) -not -path '*/.gradle/*' -not -path '*/build/*' -not -path '*/.git/*' -print0)
 
       - name: Set up Swift
         if: ${{ hashFiles('**/Package.swift') != '' }}
