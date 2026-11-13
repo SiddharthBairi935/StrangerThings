@@ -25,4 +25,4 @@ jobs:
       - name: Lint Lucas coding modules
         run: |
           python -m pip install ruff
-          ruff check app/coding_workspace.py app/delegation.py tests/test_brain.py tests/test_coding_workspace.py tests/test_lucas_engine.py
+          ruff check app/coding_workspace.py app/delegation.py tests/test_brain.py tests/test_coding_workspace.py tests/test_lucas_engine.py tests/test_lucas_integration.py
