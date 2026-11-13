@@ -26,6 +26,7 @@ from app.database import (
     save_message,
 )
 from app.delegation import create_lucas_plan
+from app.health import summarize_health_entries
 
 settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -119,74 +120,8 @@ async def max_health_summary(
     days: int = 30,
     profile_id: str = Depends(require_owner),
 ) -> dict[str, object]:
-    """Return transparent summaries of explicitly logged nutrition and progress data."""
-    safe_days = max(1, min(days, 365))
     entries = get_health_entries(settings.database_path, profile_id, limit=2000)
-    today = datetime.now(timezone.utc).date()
-    start = today.fromordinal(today.toordinal() - safe_days + 1)
-    daily: dict[str, dict[str, float | int]] = {}
-    weight_series: list[dict[str, object]] = []
-    measurements: list[dict[str, object]] = []
-    workout_sessions = 0
-    for entry in entries:
-        logged = str(entry.get("logged_at") or "")
-        try:
-            day = datetime.fromisoformat(logged.replace("Z", "+00:00")).date()
-        except ValueError:
-            continue
-        if day < start or day > today:
-            continue
-        day_key = day.isoformat()
-        bucket = daily.setdefault(day_key, {
-            "food_entries": 0, "calories": 0.0, "protein_g": 0.0,
-            "carbs_g": 0.0, "fat_g": 0.0, "workouts": 0,
-        })
-        data = entry.get("data") if isinstance(entry.get("data"), dict) else {}
-        kind = entry.get("entry_type")
-        if kind == "food":
-            bucket["food_entries"] += 1
-            nutrition = data.get("nutrition") if isinstance(data.get("nutrition"), dict) else data
-            for output, keys in {
-                "calories": ("calories", "kcal"),
-                "protein_g": ("protein_g", "protein"),
-                "carbs_g": ("carbs_g", "carbs"),
-                "fat_g": ("fat_g", "fat"),
-            }.items():
-                for key in keys:
-                    value = nutrition.get(key)
-                    if isinstance(value, (int, float)) and not isinstance(value, bool):
-                        bucket[output] += float(value)
-                        break
-        elif kind == "workout":
-            bucket["workouts"] += 1
-            workout_sessions += 1
-        elif kind == "weight":
-            value = data.get("kg")
-            unit = "kg"
-            if not isinstance(value, (int, float)):
-                value = data.get("value")
-                unit = str(data.get("unit") or "")
-            if isinstance(value, (int, float)) and not isinstance(value, bool):
-                weight_series.append({"date": day_key, "value": float(value), "unit": unit})
-        elif kind == "measurement":
-            measurements.append({"date": day_key, **data})
-    ordered_days = sorted(daily)
-    totals = {
-        key: round(sum(float(daily[day][key]) for day in ordered_days), 2)
-        for key in ("calories", "protein_g", "carbs_g", "fat_g")
-    }
-    return {
-        "period_days": safe_days,
-        "from": start.isoformat(),
-        "to": today.isoformat(),
-        "totals": totals,
-        "daily": [{"date": day, **daily[day]} for day in ordered_days],
-        "weight_series": sorted(weight_series, key=lambda item: str(item["date"])),
-        "latest_weight": max(weight_series, key=lambda item: str(item["date"])) if weight_series else None,
-        "measurements": measurements[:50],
-        "workout_sessions": workout_sessions,
-        "note": "Nutrition totals include only numeric values explicitly stored in food log entries; missing values are not estimated or treated as zero intake.",
-    }
+    return summarize_health_entries(entries, days)
 
 
 @app.get("/api/max/logs")
