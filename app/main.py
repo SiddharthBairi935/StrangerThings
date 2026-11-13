@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from app.agents import list_agents
 from app.brain import generate_reply, select_agent
 from app.config import get_settings
+from app.coding_workspace import execute_lucas_coding_task
 from app.database import (
     delete_memory,
     get_memories,
@@ -84,6 +85,10 @@ class LucasDelegationRequest(BaseModel):
     task: str = Field(min_length=1, max_length=12000)
 
 
+class LucasCodingRequest(BaseModel):
+    task: str = Field(min_length=1, max_length=12000)
+
+
 @app.get("/")
 async def root() -> FileResponse:
     return FileResponse(Path(__file__).parent / "static" / "index.html")
@@ -105,6 +110,16 @@ async def lucas_delegate(
     _: str = Depends(require_owner),
 ) -> dict[str, object]:
     return create_lucas_plan(payload.task)
+
+
+@app.post("/api/lucas/code")
+async def lucas_code(
+    payload: LucasCodingRequest,
+    _: str = Depends(require_owner),
+) -> dict[str, object]:
+    if not settings.llm_api_key or not settings.llm_model:
+        raise HTTPException(status_code=503, detail="AI provider is not configured.")
+    return await execute_lucas_coding_task(settings, payload.task)
 
 
 @app.post("/api/chat", response_model=ChatResponse)

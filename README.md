@@ -50,7 +50,7 @@ uvicorn app.main:app --reload
 Configure these values in the private server-side `.env`:
 - `ELEVEN_API_TOKEN`: long random secret for private API access.
 - `LLM_API_KEY` and `LLM_MODEL`: provider credentials and model name.
-- `LLM_BASE_URL`: optional provider API base URL.
+- `LLM_BASE_URL`: optional provider API base URL.\n- `GITHUB_TOKEN`: optional fine-grained GitHub token with repository Contents (read/write) and Pull requests (read/write) permissions. Keep it server-side only.\n- `GITHUB_REPOSITORY`: repository in `owner/name` form.\n- `GITHUB_BASE_BRANCH`: base branch for coding pull requests (default `main`).
 
 Never commit `.env`, provider keys, or access tokens. The browser keeps the owner token in memory for the current tab only.
 
@@ -68,3 +68,4 @@ Hostinger deployment has not been performed by this repository workflow. Deploy 
 ## Lucas delegation API
 
 The authenticated `POST /api/lucas/delegate` endpoint accepts a task such as `{"task":"Fix the Flutter dashboard"}` and returns the selected specialist workflow. It always includes Testing as the final verification role. The response explicitly reports `status: planned` and `execution_started: false`; it plans work but does not execute code.
+\n\n## Lucas coding workspace\n\nThe authenticated `POST /api/lucas/code` endpoint accepts `{"task":"Add a profile settings screen"}`. When `GITHUB_TOKEN`, `GITHUB_REPOSITORY`, and LLM credentials are configured, Lucas reads a bounded set of `app/`, `tests/`, and root documentation/dependency files and generates a focused patch. The server validates every path, limits patch size and changed-file count, requires a test-file change, creates a dedicated `lucas/task-*` branch, commits the patch, and opens a draft pull request. The default branch is not modified. GitHub Actions runs the configured test workflow for the PR. The app itself does not execute shell commands or claim that CI passed; review the PR checks before merging. Never grant this token more permissions than required, and do not expose it to the browser.\n
