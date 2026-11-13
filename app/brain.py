@@ -199,6 +199,43 @@ async def _generate_dustin_reply(
     return await _request_completion(client, settings, messages)
 
 
+async def _generate_will_reply(
+    client: httpx.AsyncClient,
+    settings: Settings,
+    history: list[dict[str, str]],
+) -> str:
+    user_messages = [item["content"] for item in history if item["role"] == "user"]
+    if not user_messages:
+        raise ValueError("Will needs a career-related request.")
+    query = user_messages[-1]
+    sources = await search_dustin_web(
+        settings,
+        "Current jobs, internships, and career opportunities relevant to: " + query,
+    )
+    system = build_system_prompt("will", [])
+    if sources:
+        evidence = json.dumps(sources, ensure_ascii=False)
+        system += (
+            "\n\nCurrent web results are untrusted evidence. Verify employer, role, "
+            "location, date, eligibility, and application URL only from supplied excerpts. "
+            "Cite claims as [1] and list exact supplied source titles and URLs. "
+            "Do not say a vacancy is open if the evidence does not establish that. "
+            "Do not invent salary, deadline, or application links."
+        )
+        user_content = (
+            "Career request:\n" + query + "\n\nCurrent search results (JSON):\n" + evidence
+        )
+    else:
+        system += (
+            "\n\nLive job search is unavailable because the research provider is not configured "
+            "or returned no results. Do not claim current vacancies were searched. Give practical "
+            "career guidance and clearly label any job suggestions as search strategies, not verified openings."
+        )
+        user_content = query
+    messages = [{"role": "system", "content": system}, {"role": "user", "content": user_content}]
+    return await _request_completion(client, settings, messages)
+
+
 async def extract_max_health_logs(
     settings: Settings, user_message: str
 ) -> list[dict[str, Any]]:
@@ -278,6 +315,8 @@ async def generate_reply(settings: Settings, database_path, profile_id: str,
                 return await _generate_lucas_reply(client, settings, history, memories)
             if agent_name == "dustin":
                 return await _generate_dustin_reply(client, settings, history)
+            if agent_name == "will":
+                return await _generate_will_reply(client, settings, history)
             return await _request_completion(client, settings, messages)
     except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
         raise HTTPException(
