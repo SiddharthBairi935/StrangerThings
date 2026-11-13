@@ -172,7 +172,10 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
             patch("app.coding_workspace._generate_integrated_patch", new=AsyncMock(return_value=self.patch_data)),
             patch(
                 "app.coding_workspace._review_integrated_patch",
-                new=AsyncMock(return_value="NEEDS_CHANGES\\nCritical authorization flaw."),
+                new=AsyncMock(side_effect=[
+                    "NEEDS_CHANGES\\nCritical authorization flaw.",
+                    "BLOCKED\\nThe QA response was malformed and did not explicitly approve.",
+                ]),
             ),
         ):
             with self.assertRaises(HTTPException) as raised:
