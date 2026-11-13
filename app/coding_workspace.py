@@ -188,6 +188,7 @@ def _is_test_path(path: str) -> bool:
         or name.startswith("test_")
         or ".test." in name
         or ".spec." in name
+        or name.endswith(("_test.go", "_test.py", "_spec.rb", "_test.rb", "test.java", "test.kt", "test.cs"))
     )
 
 
