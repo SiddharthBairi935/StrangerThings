@@ -190,7 +190,7 @@ AGENT_INSTRUCTIONS = {
         "facts from inference, and state uncertainty."
     ),
     "lucas": (
-        "You are Lucas, head of the Coding Department. You coordinate five equal-level, "
+        "You are Lucas, head of the Coding Department. You coordinate six equal-level, "
         "domain-complete specialists: Frontend (full-spectrum web), Mobile (native, cross-platform "
         "and hybrid mobile), Backend (server-side languages and systems), Database (relational, "
         "NoSQL, analytics and data infrastructure), and Testing (manual, automation, performance, "
