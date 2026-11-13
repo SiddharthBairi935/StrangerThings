@@ -77,7 +77,7 @@ The authenticated `POST /api/lucas/code` endpoint accepts `{"task":"Build a Reac
 3. Collects domain-specific implementation plans in parallel.
 4. Asks the Testing specialist for an independent test strategy.
 5. Integrates the plans into a structured patch and requests a separate QA review.
-6. Performs one model-driven repair pass when QA reports `NEEDS_CHANGES`.
+6. Performs one model-driven repair pass when QA reports `NEEDS_CHANGES`; if blockers remain after that pass, it refuses to publish a pull request.
 7. Validates changed paths, test-file presence, file sizes, duplicate paths, and secret-like values.
 8. Creates a dedicated `lucas/task-*` branch and opens a draft pull request.
 
