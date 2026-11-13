@@ -13,6 +13,7 @@ jobs:
   language-tests:
     name: Optional language-specific test suites
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
