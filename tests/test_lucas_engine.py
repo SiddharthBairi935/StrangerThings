@@ -14,6 +14,10 @@ class LucasSpecialistEngineTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(_qa_requires_changes("NEEDS_CHANGES\\nFix the unsafe query."))
         self.assertTrue(_qa_requires_changes("  needs_changes: missing auth check"))
         self.assertFalse(_qa_requires_changes("PASS\\nNo blocking issues found."))
+        self.assertTrue(_qa_requires_changes("FAIL\\nSecurity review incomplete."))
+        self.assertTrue(_qa_requires_changes("BLOCKED\\nMalformed QA response."))
+        self.assertTrue(_qa_requires_changes("PASSIVE\\nNot an approval."))
+        self.assertTrue(_qa_requires_changes(""))
 
     async def test_runs_selected_domain_specialists(self):
         settings = type("SettingsStub", (), {"llm_model": "test-model"})()
