@@ -17,6 +17,7 @@ from app.config import get_settings
 from app.coding_workspace import execute_lucas_coding_task
 from app.database import (
     delete_memory,
+    delete_health_entry,
     get_memories,
     init_db,
     save_health_entry,
@@ -139,6 +140,17 @@ async def max_add_health_log(
         payload.logged_at,
     )
     return {"saved": True, "id": entry_id}
+
+
+@app.delete("/api/max/logs/{entry_id}")
+async def max_delete_health_log(
+    entry_id: int,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, bool]:
+    deleted = delete_health_entry(settings.database_path, profile_id, entry_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Health log not found.")
+    return {"deleted": True}
 
 
 @app.post("/api/lucas/delegate")
