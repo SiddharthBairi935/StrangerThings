@@ -229,6 +229,23 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
         finally:
             await workspace.close()
 
+    async def test_credential_like_pr_metadata_is_rejected(self):
+        workspace = self._workspace_stub()
+        patch_with_secret_metadata = dict(self.patch_data)
+        patch_with_secret_metadata["summary"] = 'Accidentally included API_KEY = "abcdefghijklmnop12345"'
+        with (
+            patch("app.coding_workspace.GitHubWorkspace", return_value=workspace),
+            patch("app.delegation.create_lucas_plan", return_value={"specialists": ["frontend", "testing"]}),
+            patch("app.coding_workspace._run_specialist_round", new=AsyncMock(return_value={"frontend": "React plan"})),
+            patch("app.coding_workspace._chat_completion", new=AsyncMock(return_value="Test strategy")),
+            patch("app.coding_workspace._generate_integrated_patch", new=AsyncMock(return_value=patch_with_secret_metadata)),
+            patch("app.coding_workspace._review_integrated_patch", new=AsyncMock(return_value="PASS\\nNo blockers.")),
+        ):
+            with self.assertRaises(HTTPException) as raised:
+                await execute_lucas_coding_task(self.settings, "Build a React feature")
+        self.assertEqual(raised.exception.status_code, 422)
+        workspace.publish_pull_request.assert_not_awaited()
+
     async def test_truncated_repository_tree_fails_closed(self):
         workspace = GitHubWorkspace("token", "owner/repo")
 
