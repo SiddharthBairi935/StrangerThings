@@ -19,6 +19,8 @@ class AgentHierarchyTests(unittest.TestCase):
             "Find jobs on LinkedIn and improve my resume": "will",
             "Find a PDF in Google Drive": "mike",
             "Research the best cloud certifications": "dustin",
+            "Research the latest AI tools and compare reliable sources": "dustin",
+            "Find sources and fact-check this claim": "dustin",
             "Fix this Flutter bug": "lucas",
             "Build a Vue.js frontend": "lucas",
             "Create a responsive Bootstrap page": "lucas",
@@ -107,6 +109,17 @@ class AgentHierarchyTests(unittest.TestCase):
              if agents[name]["parent"] == "eleven"},
             {"max", "will", "mike", "dustin", "lucas"},
         )
+
+    def test_dustin_is_elevens_personal_research_specialist(self):
+        agents = {item["name"]: item for item in list_agents()}
+        self.assertEqual(agents["dustin"]["parent"], "eleven")
+        self.assertTrue({
+            "web_search", "source_discovery", "citations", "fact_check",
+            "evidence_synthesis", "comparisons",
+        }.issubset(set(agents["dustin"]["capabilities"])))
+        prompt = build_system_prompt("dustin", [])
+        self.assertIn("never invent", prompt.lower())
+        self.assertIn("primary", prompt.lower())
 
     def test_max_prompt_has_health_safety_and_tracking_scope(self):
         prompt = build_system_prompt("max", [])
