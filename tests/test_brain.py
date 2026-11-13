@@ -46,6 +46,8 @@ class AgentHierarchyTests(unittest.TestCase):
             "Create a GitHub Actions CI/CD pipeline": "lucas",
             "Deploy my app with Docker and Nginx": "lucas",
             "Hello Eleven": "eleven",
+            "Dustin": "dustin",
+            "Max": "max",
         }
         for message, expected in cases.items():
             with self.subTest(message=message):
