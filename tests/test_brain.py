@@ -36,10 +36,10 @@ class AgentHierarchyTests(unittest.TestCase):
             with self.subTest(message=message):
                 self.assertEqual(route_agent(message), expected)
 
-    def test_lucas_has_five_equal_level_specialists(self):
+    def test_lucas_has_six_equal_level_specialists(self):
         agents = {item["name"]: item for item in list_agents()}
         self.assertEqual(agents["lucas"]["parent"], "eleven")
-        specialist_names = {"frontend", "mobile", "backend", "database", "testing"}
+        specialist_names = {"frontend", "mobile", "backend", "database", "testing", "devops"}
         self.assertEqual(
             {name for name, item in agents.items() if item["parent"] == "lucas"},
             specialist_names,
