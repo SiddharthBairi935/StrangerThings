@@ -73,5 +73,5 @@ def summarize_health_entries(
         "latest_weight": weight_series[-1] if weight_series else None,
         "measurements": measurements[:50],
         "workout_sessions": workout_sessions,
-        "note": "Nutrition totals include only numeric values explicitly stored in food log entries; missing values are not estimated or treated as zero intake.",
+        "note": "Nutrition totals include only numeric values stored in food logs. Values marked AI estimate are approximate, not measurements; missing values are not estimated or treated as zero intake.",
     }
