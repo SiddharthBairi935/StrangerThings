@@ -113,6 +113,7 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
         self.assertTrue(_contains_hardcoded_secret("Authorization: Bearer abcdefghijklmnopqrstuvwxyz123456"))
         self.assertTrue(_contains_hardcoded_secret('password = "correct-horse-battery"'))
         self.assertTrue(_contains_hardcoded_secret('SECRET_KEY = "abcdefghijklmnop12345"'))
+        self.assertTrue(_contains_hardcoded_secret('SUPABASE_SERVICE_ROLE_KEY = "abcdefghijklmnop12345"'))
         with self.assertRaises(HTTPException):
             _parse_patch(
                 '{"files":[{"path":"backend/config.py","content":"API_KEY = \\\"1234567890abcdef1234\\\""},'
