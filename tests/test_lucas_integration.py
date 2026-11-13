@@ -117,7 +117,6 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
         workspace = self._workspace_stub()
         with (
             patch("app.coding_workspace.GitHubWorkspace", return_value=workspace),
-            patch("app.coding_workspace.create_lucas_plan", create=True) as unused_plan,
             patch("app.delegation.create_lucas_plan", return_value={"specialists": ["frontend", "testing"]}),
             patch("app.coding_workspace._run_specialist_round", new=AsyncMock(return_value={"frontend": "React plan"})) as specialists,
             patch("app.coding_workspace._chat_completion", new=AsyncMock(return_value="Test strategy")) as completion,
