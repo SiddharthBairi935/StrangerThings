@@ -5,7 +5,7 @@ from typing import Literal
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -175,7 +175,7 @@ async def mike_drive_status(_: str = Depends(require_owner)) -> dict[str, object
 
 @app.get("/api/mike/drive/search")
 async def mike_drive_search(
-    q: str = Field(min_length=1, max_length=300),
+    q: str = Query(min_length=1, max_length=300),
     limit: int = 20,
     _: str = Depends(require_owner),
 ) -> dict[str, object]:
