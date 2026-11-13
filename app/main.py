@@ -12,7 +12,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from app.agents import list_agents
-from app.brain import generate_reply, select_agent
+from app.brain import extract_max_health_logs, generate_reply, select_agent
 from app.config import get_settings
 from app.coding_workspace import execute_lucas_coding_task
 from app.database import (
@@ -181,6 +181,15 @@ async def chat(
     save_message(
         settings.database_path, conversation_id, "user", payload.message, profile_id
     )
+    if agent_name == "max" and settings.llm_api_key and settings.llm_model:
+        extracted_logs = await extract_max_health_logs(settings, payload.message)
+        for entry in extracted_logs:
+            save_health_entry(
+                settings.database_path,
+                profile_id,
+                entry["entry_type"],
+                entry["data"],
+            )
     answer = await generate_reply(
         settings,
         settings.database_path,
