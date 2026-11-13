@@ -59,7 +59,7 @@ class HealthSummaryTests(unittest.TestCase):
         summary = summarize_health_entries(entries, 999, today=date(2026, 11, 13))
         self.assertEqual(summary["period_days"], 365)
         self.assertEqual(summary["totals"]["calories"], 0)
-        self.assertIn("only numeric values explicitly stored", summary["note"])
+        self.assertIn("AI estimate", summary["note"])
 
 
 if __name__ == "__main__":
