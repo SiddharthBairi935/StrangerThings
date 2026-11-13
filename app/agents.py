@@ -133,8 +133,8 @@ def route_agent(message: str) -> str:
     text = " ".join(message.lower().split())
 
     routes = (
-        ("max", ("workout", "fitness", "diet", "nutrition", "food log", "food diary", "meal plan",
-                 "calorie", "calories", "macros", "protein", "carbs", "fat loss", "weight loss",
+        ("max", ("workout", "fitness", "diet", "nutrition", "food", "meal", "ate", "eaten", "breakfast", "lunch", "dinner", "snack", "food log", "food diary", "meal plan",
+                 "calorie", "calories", "macros", "protein", "carbs", "fat loss", "weight loss", "weight", "weighed", "calorie deficit", "cutting", "bulking",
                  "weight gain", "weight trend", "weekly weight", "weight tracking", "body measurement", "body measurements", "muscle", "gym",
                  "body fat", "exercise", "steps", "hydration", "recovery", "वजन", "डाइट",
                  "वर्कआउट", "खाना", "कैलोरी", "प्रोटीन", "मसल")),
