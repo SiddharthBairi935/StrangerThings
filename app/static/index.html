@@ -60,9 +60,34 @@ button,input,textarea{font:inherit}button{cursor:pointer}.shell{display:grid;gri
 <script>
 let accessToken="",conversationId=null;
 const $=id=>document.getElementById(id);
-function setConnection(ok,label){$("connectionLabel").textContent=label;$("statusText").textContent=ok?"Connected to private API":"Ready to connect"}
+function setConnection(ok,label){$("connectionLabel").textContent=label;$("statusText").textContent=ok?"Connected to private API":label}
 function addMessage(role,text,agent){$("welcome").style.display="none";const wrap=document.createElement("div");wrap.className="msg "+role;const meta=document.createElement("div");meta.className="meta";meta.textContent=role==="user"?"YOU":("ELEVEN"+(agent?" · "+agent.toUpperCase():""));const body=document.createElement("div");body.textContent=text;wrap.append(meta,body);$("messages").append(wrap);wrap.scrollIntoView({behavior:"smooth",block:"end"})}
-$("connect").onclick=()=>{const token=$("token").value.trim();if(!token){$("notice").textContent="Please enter your server owner token.";return}accessToken=token;$("token").value="";setConnection(true,"Connected (tab only)");$("notice").textContent="Token held in memory for this tab only. It will be cleared when you close or refresh this page."};
+$("connect").onclick=async()=>{
+ const button=$("connect");
+ const token=$("token").value.trim();
+ if(!token){$("notice").textContent="Please enter your server owner token.";return}
+ button.disabled=true;
+ button.textContent="Verifying…";
+ $("notice").textContent="Checking your token with the private API…";
+ try{
+  const response=await fetch("/api/auth/verify",{method:"GET",headers:{"Authorization":"Bearer "+token}});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok||data.authenticated!==true){
+   throw new Error(data.detail||"Invalid owner token. Please check it and try again.");
+  }
+  accessToken=token;
+  $("token").value="";
+  setConnection(true,"Connected (tab only)");
+  $("notice").textContent="Token verified successfully. It is stored only in this browser tab and cleared when you refresh or close it.";
+ }catch(error){
+  accessToken="";
+  setConnection(false,"Authentication required");
+  $("notice").textContent=error.message||"Could not verify the token. Check that the server is running.";
+ }finally{
+  button.disabled=false;
+  button.textContent="Connect";
+ }
+};
 $("disconnect").onclick=()=>{accessToken="";setConnection(false,"Not connected");$("notice").textContent="Disconnected. Enter your token to connect again."};
 $("newChat").onclick=()=>{conversationId=null;$("messages").replaceChildren();$("welcome").style.display="block";$("message").focus()};
 function authHeaders(){return {"Authorization":"Bearer "+accessToken}}
