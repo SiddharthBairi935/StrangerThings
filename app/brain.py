@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from app.agents import AGENT_INSTRUCTIONS
 from app.config import Settings
-from app.database import get_history, get_memories
+from app.database import get_health_entries, get_history, get_memories
 from app.delegation import create_lucas_plan
 
 SPECIALIST_INSTRUCTIONS = {
@@ -129,6 +129,18 @@ async def generate_reply(settings: Settings, database_path, profile_id: str,
     history = get_history(database_path, conversation_id, limit=20, profile_id=profile_id)
     memories = get_memories(database_path, profile_id, limit=30)
     messages = [{"role": "system", "content": build_system_prompt(agent_name, memories)}]
+    if agent_name == "max":
+        health_entries = get_health_entries(database_path, profile_id, limit=40)
+        if health_entries:
+            import json
+            messages.append({
+                "role": "system",
+                "content": (
+                    "Recent owner-provided health logs (newest first; data may be incomplete; "
+                    "do not treat estimates as measured facts):\\n"
+                    + json.dumps(health_entries, ensure_ascii=False)
+                ),
+            })
     messages.extend(
         {"role": item["role"], "content": item["content"]}
         for item in history if item["role"] in {"user", "assistant"}
