@@ -18,7 +18,7 @@ AGENTS: tuple[AgentInfo, ...] = (
     AgentInfo("max", "Max", "Personal health and fitness coach: food logs, nutrition estimates, meal planning, workouts, activity, weight trends, measurements, recovery, and progress. Not a medical diagnostician.", "active", "eleven", ("diet", "nutrition", "food_logging", "calorie_estimates", "macros", "meal_planning", "fitness", "workouts", "exercise_tracking", "weight_tracking", "body_measurements", "progress", "recovery", "habit_coaching")),
     AgentInfo("will", "Will", "LinkedIn and career: professional profile, job search, freelancing, networking, and resume support.", "planned", "eleven", ("linkedin", "jobs", "freelance", "resume")),
     AgentInfo("mike", "Mike", "Google Drive: find, organize, read, summarize, and manage files with connected and approved Drive access.", "planned", "eleven", ("drive", "files", "documents")),
-    AgentInfo("dustin", "Dustin", "General day-to-day research, comparisons, fact-checking, learning, and evidence-based recommendations.", "active", "eleven", ("research", "compare", "fact_check")),
+    AgentInfo("dustin", "Dustin", "Personal research specialist: live web research, source discovery, fact-checking, comparisons, evidence synthesis, market and product research, learning briefs, and cited reports.", "active", "eleven", ("research", "web_search", "source_discovery", "citations", "fact_check", "evidence_synthesis", "comparisons", "market_research", "product_research", "academic_research", "news_research", "research_reports")),
     AgentInfo("lucas", "Lucas", "Head of the Coding Department. Delegates engineering work to six equal-level coding specialists and coordinates their results.", "active", "eleven", ("software_development", "code_review", "coordination")),
     AgentInfo("frontend", "Frontend Agent", "Full-spectrum frontend engineering: HTML, CSS, JavaScript, TypeScript, web frameworks, UI systems, responsive UX, accessibility, APIs, tooling, performance, and frontend testing.", "active", "lucas", (
         "html", "html5", "css", "css3", "javascript", "es6_plus", "typescript",
@@ -155,8 +155,9 @@ def route_agent(message: str) -> str:
                    "sql", "database", "mongodb", "postgres", "mysql", "redis", "cassandra",
                    "dynamodb", "api", "code", "coding", "program", "function", "github repo",
                    "ऐप बनाओ", "कोड")),
-        ("dustin", ("research", "investigate", "compare", "comparison", "sources",
-                    "latest information", "market analysis", "competitor", "fact check",
+        ("dustin", ("research", "investigate", "compare", "comparison", "sources", "source",
+                    "latest information", "latest", "current", "market analysis", "competitor", "fact check",
+                    "fact-check", "pros and cons", "deep dive", "research report", "findings", "evidence",
                     "अध्ययन", "तुलना", "रिसर्च")),
     )
     for agent_name, phrases in routes:
@@ -186,9 +187,7 @@ AGENT_INSTRUCTIONS = {
         "share, or delete files without the required tool and user approval."
     ),
     "dustin": (
-        "You are Dustin, the general research specialist for day-to-day questions. For current "
-        "or consequential claims, use reliable sources when available, distinguish verified "
-        "facts from inference, and state uncertainty."
+        "You are Dustin, Eleven’s personal research specialist. Investigate the user’s question, search current web sources when the research provider is connected, prioritize primary and authoritative sources, compare independent evidence, verify dates and claims, separate facts from inference, note disagreements and uncertainty, and produce a concise answer with numbered citations that map exactly to supplied source URLs. Never invent a source, quotation, statistic, publication date, or URL. If live search is not configured, say so clearly and label the response as general-knowledge guidance rather than current research. For product/market comparisons, state criteria and trade-offs; for academic topics, distinguish peer-reviewed evidence from commentary."
     ),
     "lucas": (
         "You are Lucas, head of the Coding Department. You coordinate six equal-level, "
