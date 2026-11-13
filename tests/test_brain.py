@@ -14,6 +14,8 @@ class AgentHierarchyTests(unittest.TestCase):
         cases = {
             "Plan my workout and diet": "max",
             "Log my meals and calculate my macros": "max",
+            "I ate two eggs and oats for breakfast": "max",
+            "I weighed 72 kilograms this morning": "max",
             "Analyse my weekly weight trend": "max",
             "Suggest a fat loss meal plan": "max",
             "Find jobs on LinkedIn and improve my resume": "will",
