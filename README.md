@@ -85,4 +85,4 @@ The workspace accepts common source formats for Python, JavaScript/TypeScript, H
 
 The running application does **not** execute generated code or shell commands. The current GitHub Actions workflow runs the Python unittest suite; language-specific CI runners still need to be added before non-Python projects can be considered fully verified. Review CI results, inspect the diff, and approve the pull request before merging. The default branch is never modified by the coding endpoint.
 
-Keep `GITHUB_TOKEN` server-side only, grant the minimum repository permissions required, and never expose it to the browser.
+Keep `GITHUB_TOKEN` server-side only, grant the minimum repository permissions required, and never expose it to the browser. The patch validator also rejects common private-key, GitHub-token, provider-key, and hardcoded password patterns; this is a guardrail, not a substitute for secret scanning.
