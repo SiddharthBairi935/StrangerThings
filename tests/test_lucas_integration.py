@@ -189,7 +189,7 @@ class LucasCodingWorkflowIntegrationTests(unittest.IsolatedAsyncioTestCase):
             await execute_lucas_coding_task(
                 self.settings,
                 'Please use API_KEY = "abcdefghijklmnop12345"',
-                )
+            )
         self.assertEqual(raised.exception.status_code, 422)
         workspace_factory.assert_not_called()
 
