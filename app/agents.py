@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 
@@ -15,10 +16,10 @@ class AgentInfo:
 # It does not imply that external accounts or tools are connected.
 AGENTS: tuple[AgentInfo, ...] = (
     AgentInfo("eleven", "Eleven (11) / L", "Main assistant, central brain, task planner, and coordinator for every department.", "active", None, ("chat", "planning", "delegation", "coordination")),
-    AgentInfo("max", "Max", "Health and fitness: diet planning, workouts, activity, weight, measurements, and progress. Not a medical diagnostician.", "active", "eleven", ("diet", "fitness", "workouts", "progress")),
+    AgentInfo("max", "Max", "Personal health and fitness coach: food logs, nutrition estimates, meal planning, workouts, activity, weight trends, measurements, recovery, and progress. Not a medical diagnostician.", "active", "eleven", ("diet", "nutrition", "food_logging", "calorie_estimates", "macros", "meal_planning", "fitness", "workouts", "exercise_tracking", "weight_tracking", "body_measurements", "progress", "recovery", "habit_coaching")),
     AgentInfo("will", "Will", "LinkedIn and career: professional profile, job search, freelancing, networking, and resume support.", "planned", "eleven", ("linkedin", "jobs", "freelance", "resume")),
     AgentInfo("mike", "Mike", "Google Drive: find, organize, read, summarize, and manage files with connected and approved Drive access.", "planned", "eleven", ("drive", "files", "documents")),
-    AgentInfo("dustin", "Dustin", "General day-to-day research, comparisons, fact-checking, learning, and evidence-based recommendations.", "active", "eleven", ("research", "compare", "fact_check")),
+    AgentInfo("dustin", "Dustin", "Personal research specialist: live web research, source discovery, fact-checking, comparisons, evidence synthesis, market and product research, learning briefs, and cited reports.", "active", "eleven", ("research", "web_search", "source_discovery", "citations", "fact_check", "evidence_synthesis", "comparisons", "market_research", "product_research", "academic_research", "news_research", "research_reports")),
     AgentInfo("lucas", "Lucas", "Head of the Coding Department. Delegates engineering work to six equal-level coding specialists and coordinates their results.", "active", "eleven", ("software_development", "code_review", "coordination")),
     AgentInfo("frontend", "Frontend Agent", "Full-spectrum frontend engineering: HTML, CSS, JavaScript, TypeScript, web frameworks, UI systems, responsive UX, accessibility, APIs, tooling, performance, and frontend testing.", "active", "lucas", (
         "html", "html5", "css", "css3", "javascript", "es6_plus", "typescript",
@@ -132,16 +133,26 @@ def route_agent(message: str) -> str:
     """Choose the best top-level department for a user request."""
     text = " ".join(message.lower().split())
 
+    for explicit_name, agent_name in (
+        ("max", "max"), ("dustin", "dustin"), ("will", "will"),
+        ("mike", "mike"), ("lucas", "lucas"),
+    ):
+        if re.search(r"(?<!\w)" + re.escape(explicit_name) + r"(?!\w)", text):
+            return agent_name
+
     routes = (
-        ("max", ("workout", "fitness", "diet", "calorie", "weight loss", "weight gain",
-                 "muscle", "gym", "protein", "body fat", "exercise", "वजन", "डाइट", "वर्कआउट")),
+        ("max", ("workout", "fitness", "diet", "nutrition", "food", "meal", "ate", "eaten", "breakfast", "lunch", "dinner", "snack", "food log", "food diary", "meal plan",
+                 "calorie", "calories", "macros", "protein", "carbs", "fat loss", "weight loss", "weight", "weighed", "calorie deficit", "cutting", "bulking",
+                 "weight gain", "weight trend", "weekly weight", "weight tracking", "body measurement", "body measurements", "muscle", "gym",
+                 "body fat", "exercise", "steps", "hydration", "recovery", "वजन", "डाइट",
+                 "वर्कआउट", "खाना", "कैलोरी", "प्रोटीन", "मसल")),
         ("will", ("linkedin", "job opening", "job openings", "job search", "freelance",
                   "freelancing", "resume", "cv", "career", "नौकरी", "रिज्यूमे")),
         ("mike", ("google drive", "drive file", "drive folder", "my documents", "file in drive",
                   "गूगल ड्राइव")),
         ("lucas", ("debug", "bug", "stack trace", "exception", "python", "django", "flask", "fastapi",
                    "javascript", "typescript", "html", "css", "sass", "scss", "less", "bootstrap",
-                   "tailwind", "react", "next.js", "nextjs", "angular", "vue", "nuxt", "svelte",
+                   "tailwind", "react", "next.js", "nextjs", "angular", "vue", "nuxt", "svelte", "sveltekit",
                    "astro", "redux", "zustand", "playwright", "cypress", "selenium", "jest", "vitest",
                    "flutter", "dart", "react native", "android", "kotlin", "swift", "swiftui",
                    "ionic", "xamarin", ".net maui", "java", "spring", "php", "laravel", "asp.net",
@@ -152,12 +163,13 @@ def route_agent(message: str) -> str:
                    "sql", "database", "mongodb", "postgres", "mysql", "redis", "cassandra",
                    "dynamodb", "api", "code", "coding", "program", "function", "github repo",
                    "ऐप बनाओ", "कोड")),
-        ("dustin", ("research", "investigate", "compare", "comparison", "sources",
-                    "latest information", "market analysis", "competitor", "fact check",
+        ("dustin", ("research", "investigate", "compare", "comparison", "sources", "source",
+                    "latest information", "latest", "current", "market analysis", "competitor", "fact check",
+                    "fact-check", "pros and cons", "deep dive", "research report", "findings", "evidence",
                     "अध्ययन", "तुलना", "रिसर्च")),
     )
     for agent_name, phrases in routes:
-        if any(phrase in text for phrase in phrases):
+        if any(re.search(r"(?<!\w)" + re.escape(phrase) + r"(?!\w)", text) for phrase in phrases):
             return agent_name
     return "eleven"
 
@@ -170,9 +182,7 @@ AGENT_INSTRUCTIONS = {
         "performed work unless execution was actually confirmed."
     ),
     "max": (
-        "You are Max, responsible for fitness, diet, workouts, activity, body measurements, "
-        "and progress. Give practical, balanced guidance, ask for missing context when needed, "
-        "and do not diagnose medical conditions or replace a clinician."
+        "You are Max, Eleven’s personal health and fitness specialist. Manage daily food and drink logs, estimate calories and macros with clearly stated uncertainty, compare intake with the user’s goals, suggest practical meals and substitutions, plan and review workouts, track activity and recovery, interpret weight trends and body measurements, and give realistic progress projections as ranges rather than promises. Ask for missing quantities, cooked/raw state, brands, preparation methods, workout sets/reps, and weigh-in conditions when these materially affect an estimate. Prefer weekly weight averages over single-day fluctuations. Never shame the user, prescribe crash diets, encourage extreme deficits, diagnose conditions, or change medication. Flag symptoms, eating-disorder signals, unsafe restriction, or medical concerns and recommend a qualified clinician or registered dietitian. Do not infer that a food or workout was completed unless the user logged it. Treat logged health data as private, use only the owner’s records, and distinguish estimates from measured facts."
     ),
     "will": (
         "You are Will, responsible for LinkedIn and career support: profile improvement, jobs, "
@@ -185,9 +195,7 @@ AGENT_INSTRUCTIONS = {
         "share, or delete files without the required tool and user approval."
     ),
     "dustin": (
-        "You are Dustin, the general research specialist for day-to-day questions. For current "
-        "or consequential claims, use reliable sources when available, distinguish verified "
-        "facts from inference, and state uncertainty."
+        "You are Dustin, Eleven’s personal research specialist. Investigate the user’s question, search current web sources when the research provider is connected, prioritize primary and authoritative sources, compare independent evidence, verify dates and claims, separate facts from inference, note disagreements and uncertainty, and produce a concise answer with numbered citations that map exactly to supplied source URLs. Never invent a source, quotation, statistic, publication date, or URL. If live search is not configured, say so clearly and label the response as general-knowledge guidance rather than current research. For product/market comparisons, state criteria and trade-offs; for academic topics, distinguish peer-reviewed evidence from commentary."
     ),
     "lucas": (
         "You are Lucas, head of the Coding Department. You coordinate six equal-level, "

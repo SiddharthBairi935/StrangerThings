@@ -1,6 +1,7 @@
 import secrets
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Literal
 from pathlib import Path
 from uuid import uuid4
 
@@ -11,17 +12,21 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from app.agents import list_agents
-from app.brain import generate_reply, select_agent
+from app.brain import extract_max_health_logs, generate_reply, select_agent
 from app.config import get_settings
 from app.coding_workspace import execute_lucas_coding_task
 from app.database import (
     delete_memory,
+    delete_health_entry,
     get_memories,
     init_db,
+    save_health_entry,
+    get_health_entries,
     save_memory,
     save_message,
 )
 from app.delegation import create_lucas_plan
+from app.health import summarize_health_entries
 
 settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -81,6 +86,12 @@ class MemoryRequest(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
 
 
+class MaxHealthLogRequest(BaseModel):
+    entry_type: Literal["food", "workout", "weight", "measurement", "activity", "note"]
+    data: dict[str, object] = Field(min_length=1)
+    logged_at: str | None = Field(default=None, max_length=40)
+
+
 class LucasDelegationRequest(BaseModel):
     task: str = Field(min_length=1, max_length=12000)
 
@@ -102,6 +113,54 @@ async def health() -> dict[str, str]:
 @app.get("/api/agents")
 async def agents() -> dict[str, object]:
     return {"agents": list_agents()}
+
+
+@app.get("/api/max/summary")
+async def max_health_summary(
+    days: int = 30,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, object]:
+    entries = get_health_entries(settings.database_path, profile_id, limit=2000)
+    return summarize_health_entries(entries, days)
+
+
+@app.get("/api/max/logs")
+async def max_health_logs(
+    limit: int = 50,
+    entry_type: Literal["food", "workout", "weight", "measurement", "activity", "note"] | None = None,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, object]:
+    return {
+        "entries": get_health_entries(
+            settings.database_path, profile_id, limit=limit, entry_type=entry_type
+        )
+    }
+
+
+@app.post("/api/max/logs")
+async def max_add_health_log(
+    payload: MaxHealthLogRequest,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, object]:
+    entry_id = save_health_entry(
+        settings.database_path,
+        profile_id,
+        payload.entry_type,
+        payload.data,
+        payload.logged_at,
+    )
+    return {"saved": True, "id": entry_id}
+
+
+@app.delete("/api/max/logs/{entry_id}")
+async def max_delete_health_log(
+    entry_id: int,
+    profile_id: str = Depends(require_owner),
+) -> dict[str, bool]:
+    deleted = delete_health_entry(settings.database_path, profile_id, entry_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Health log not found.")
+    return {"deleted": True}
 
 
 @app.post("/api/lucas/delegate")
@@ -132,6 +191,15 @@ async def chat(
     save_message(
         settings.database_path, conversation_id, "user", payload.message, profile_id
     )
+    if agent_name == "max" and settings.llm_api_key and settings.llm_model:
+        extracted_logs = await extract_max_health_logs(settings, payload.message)
+        for entry in extracted_logs:
+            save_health_entry(
+                settings.database_path,
+                profile_id,
+                entry["entry_type"],
+                entry["data"],
+            )
     answer = await generate_reply(
         settings,
         settings.database_path,
