@@ -66,6 +66,9 @@ class LucasCodingWorkspaceValidationTests(unittest.TestCase):
             "mobile/test/widget_test.dart",
             "backend/src/test/java/ServiceTest.java",
             "backend/tests/api_test.go",
+            "backend/handler_test.go",
+            "backend/spec/models_spec.rb",
+            "backend/src/test/java/ServiceTest.java",
         ):
             with self.subTest(path=path):
                 self.assertTrue(_is_test_path(path))
