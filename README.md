@@ -33,7 +33,7 @@ Each specialist is expected to cover the broad, end-to-end skill set of its own 
 - Max's authenticated health-log API stores owner-scoped food, workout, weight, measurement, activity and note entries; explicit completed/current facts in Max chat are extracted and saved when the configured model can validate them.
 - Max receives recent private health logs as context, uses cautious nutrition estimates and weekly weight trends, and follows non-diagnostic health-safety guidance.
 - Max progress summary at `GET /api/max/summary?days=30` reports logged nutrition totals, workout sessions, weight trend and measurements; missing nutrition values are never invented or counted as measured zero.
-- Dustin uses the optional Tavily Search API (`TAVILY_API_KEY`) to retrieve live web results and generate evidence-linked research answers. Without a configured search key or if search fails, Dustin explicitly falls back to general knowledge and must not claim live research.
+- Dustin and Will use the optional Tavily Search API (`TAVILY_API_KEY`) to retrieve live web results and generate evidence-linked research answers. Without a configured search key or if search fails, Dustin explicitly falls back to general knowledge and must not claim live research.
 - Broad capability registries and role instructions for all six Lucas coding specialists.
 - Lucas delegation planner at `POST /api/lucas/delegate`, which selects specialists from task keywords and always includes Testing.
 - User-approved memory endpoints.
@@ -105,3 +105,17 @@ The workspace accepts common source formats for Python, JavaScript/TypeScript, H
 The running application does **not** execute generated code or shell commands. GitHub Actions runs the Python unittest suite, endpoint/workflow integration tests, Ruff, and executable smoke projects for TypeScript/Node.js, Flutter/Dart, Java/Maven, Kotlin/Gradle, C#, Go, Rust, Swift, C, C++, PHP, Ruby, and PostgreSQL SQL migrations/assertions. The smoke projects are intentionally small validation fixtures, not production application templates. A language job is skipped when its manifest is absent; review the actual CI jobs for each pull request. Review CI results, inspect the diff, and approve the pull request before merging. The default branch is never modified by the coding endpoint.
 
 Keep `GITHUB_TOKEN` server-side only, grant the minimum repository permissions required, and never expose it to the browser. Before model calls, the workspace rejects credential-like task text and omits repository files that match its credential detectors; generated patches are also checked for private-key, GitHub-token, provider-key, and hardcoded password patterns. These are defense-in-depth guardrails, not a substitute for repository secret scanning.
+
+
+## Mike Google Drive integration
+
+Mike's initial Google Drive integration is read-only. Configure `GOOGLE_DRIVE_ACCESS_TOKEN` only in the private server environment, using a Google OAuth access token granted the `https://www.googleapis.com/auth/drive.readonly` scope. Never commit the token or return it to the browser. The authenticated endpoints are:
+- `GET /api/mike/drive/status` — reports whether the server-side token is configured.
+- `GET /api/mike/drive/search?q=...` — searches file names and full text.
+- `GET /api/mike/drive/files/{file_id}` — reads metadata and supported text content (Google Docs export and text/JSON/XML files).
+
+The access token must be refreshed by the deployment's OAuth integration before expiry; this first phase does not implement the interactive Google OAuth consent/callback flow. Binary PDF/Office extraction and all file mutations are intentionally out of scope for this read-only phase. Mike must not claim Drive access when the token is absent.
+
+## Will career integration
+
+Will provides ATS resume/CV feedback, LinkedIn profile strategy, internship/job-search planning, interview preparation, portfolio guidance, freelancing proposals and networking support. When `TAVILY_API_KEY` is configured, Will can research current job/internship results through the same server-side Tavily provider used by Dustin. Results are treated as untrusted evidence and must be cited exactly; openings, salary, deadlines and URLs must not be invented. Without search configuration, Will provides career guidance but clearly states that live vacancies are unverified. Will does not access LinkedIn accounts, send messages or submit applications.
