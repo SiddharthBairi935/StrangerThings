@@ -34,6 +34,14 @@ class LucasCodingEndpointTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 401)
 
+    def test_missing_owner_token_configuration_fails_closed(self):
+        with patch.object(main.settings, "api_access_token", None):
+            response = self.client.post(
+                "/api/lucas/code",
+                json={"task": "Build a React page"},
+            )
+        self.assertEqual(response.status_code, 503)
+
     def test_request_validation_rejects_empty_or_oversized_task(self):
         headers = {"Authorization": "Bearer owner-test-token"}
         self.assertEqual(
