@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     llm_base_url: str = Field(default="https://api.openai.com", validation_alias="LLM_BASE_URL")
     llm_model: str | None = Field(default=None, validation_alias="LLM_MODEL")
     llm_timeout_seconds: float = Field(default=45.0, validation_alias="LLM_TIMEOUT_SECONDS", gt=0, le=180)
+\n    github_token: str | None = Field(default=None, validation_alias="GITHUB_TOKEN")
+    github_repository: str | None = Field(default=None, validation_alias="GITHUB_REPOSITORY")
+    github_base_branch: str = Field(default="main", validation_alias="GITHUB_BASE_BRANCH")
 
     database_path: Path = Field(default=Path("./data/eleven.db"), validation_alias="DATABASE_PATH")
     cors_origins: str = Field(
