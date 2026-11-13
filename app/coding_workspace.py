@@ -290,7 +290,9 @@ async def _chat_completion(client: httpx.AsyncClient, settings: Any,
 
 
 def _qa_requires_changes(review: str) -> bool:
-    return review.lstrip().upper().startswith("NEEDS_CHANGES")
+    # Only an explicit PASS is approval. Empty, malformed, FAIL, and
+    # NEEDS_CHANGES responses all fail closed and trigger repair/rejection.
+    return re.match(r"^PASS(?:\\b|$)", review.lstrip().upper()) is None
 
 
 def _repository_context(files: dict[str, str]) -> str:
@@ -432,7 +434,7 @@ async def execute_lucas_coding_task(settings: Any, task: str) -> dict[str, Any]:
                     raise HTTPException(
                         status_code=422,
                         detail=(
-                            "Testing specialist still reports blockers after Lucas's repair attempt; "
+                            "Testing specialist did not return an explicit PASS after Lucas's repair attempt; "
                             "no pull request was created. Review: " + qa_review[:1200]
                         ),
                     )
