@@ -169,6 +169,10 @@ def _allowed_path(path: str) -> bool:
     pure = PurePosixPath(path)
     if path in ALLOWED_ROOT_FILES:
         return True
+    if pure.name in {"Gemfile", "Gemfile.lock", "Rakefile", "Podfile"} and any(
+        path.startswith(root) for root in ALLOWED_ROOTS
+    ):
+        return True
     if pure.suffix.lower() not in ALLOWED_SUFFIXES:
         return False
     return any(path.startswith(root) for root in ALLOWED_ROOTS)
