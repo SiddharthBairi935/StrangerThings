@@ -26,7 +26,7 @@ ALLOWED_ROOT_FILES = {
     "settings.gradle", "settings.gradle.kts", "gradle.properties",
     "composer.json", "composer.lock", "Gemfile", "Gemfile.lock",
     "Directory.Build.props", "global.json", "NuGet.Config",
-    "Package.swift", "Package.resolved", "Podfile", "Rakefile",
+    "Package.swift", "Package.resolved", "Podfile", "Rakefile", "CMakeLists.txt",
 }
 ALLOWED_SUFFIXES = {
     ".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx",
